@@ -4,10 +4,10 @@ const webpack = require("webpack");
 module.exports = {
   mode: "development",
   entry: {
-    path: path.join(__dirname, "components", "csr-main.js"),
+    bundle: path.join(__dirname, "components", "csr-main.js"),
   },
   output: {
-    filename: "bundle.js",
+    filename: "[name].js",
     path: path.join(__dirname, "public", "js")
   },
   module: {
@@ -31,11 +31,36 @@ module.exports = {
             loader: "css-loader"
           }
         ]
+      },
+      {
+        test: /\.scss$/,
+        use: [
+          {
+            loader: "style-loader"
+          },
+          {
+            loader: "css-loader"
+          },
+          {
+            loader: "postcss-loader",
+            options: {
+              plugins: function() {
+                return [
+                  require("precss"),
+                  require("autoprefixer")
+                ];
+              }
+            }
+          },
+          {
+            loader: "sass-loader"
+          }
+        ]
       }
     ]
   },
   resolve: {
-    extensions: [".js", ".jsx", "css"]
+    extensions: [".js", ".jsx", "css", "scss"]
   },
   plugins: []
 };

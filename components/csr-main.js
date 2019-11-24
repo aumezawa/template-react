@@ -1,12 +1,16 @@
 import React from "react"
 import ReactDOM from "react-dom"
-import "bootstrap";
-import "bootstrap/dist/css/bootstrap.min.css";
+
+import "bootstrap"
+import "./bootstrap-custom.scss"
+//import "bootstrap/dist/css/bootstrap.min.css"
 
 export default class CsrMain extends React.Component {
 
   constructor(props) {
     super(props)
+    this.state = {
+    }
   }
 
   static get propTypes() {
