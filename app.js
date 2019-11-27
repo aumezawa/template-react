@@ -5,6 +5,7 @@ import logger from "morgan"
 import path from "path"
 
 import indexRouter from "./routes/index"
+import storageRouter from "./routes/storage"
 
 const app = express()
 
@@ -18,9 +19,11 @@ app.use(logger("dev"));
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(cookieParser())
-app.use(express.static(path.join(__dirname, "public")))
 
 app.use("/", indexRouter)
+app.use("/", express.static(path.join(__dirname, "public")))
+app.use(storageRouter.uripath, storageRouter)
+app.use(storageRouter.uripath, express.static(path.join(__dirname, storageRouter.dirpath)))
 
 /*
 app.use(function(req, res, next) {
