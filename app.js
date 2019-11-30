@@ -22,8 +22,8 @@ app.use(cookieParser())
 
 app.use("/", indexRouter)
 app.use("/", express.static(path.join(__dirname, "public")))
-app.use(storageRouter.uripath, storageRouter)
-app.use(storageRouter.uripath, express.static(path.join(__dirname, storageRouter.dirpath)))
+app.use(storageRouter.uriPath, storageRouter)
+app.use(storageRouter.uriPath, express.static(storageRouter.dirPath))
 
 /*
 app.use(function(req, res, next) {
