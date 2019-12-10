@@ -1,11 +1,16 @@
 import express from "express"
 import cookieParser from "cookie-parser"
 import bodyParser from "body-parser"
+import fs from "fs"
 import logger from "morgan"
+import passport from "passport"
+import passportLocal from "passport-local"
 import path from "path"
+import session from "express-session"
 
 import indexRouter from "./routes/index"
 import storageRouter from "./routes/storage"
+import authRouter from "./routes/auth"
 
 const app = express()
 
@@ -20,10 +25,32 @@ app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(cookieParser())
 
+app.use(session({ secret: "react-aume" }))
+app.use(passport.initialize())
+app.use(passport.session())
+
+passport.use(new passportLocal.Strategy({
+    userNameField: "username",
+    passwordField: "password"
+  }, (username, password, done) => {
+    process.nextTick(() => {
+      fs.readFile(path.join(__dirname, "auth", "userlist.json"), (err, data) => {
+        if (err) { return done(null, false) }
+        if (password !== JSON.parse(data)[username]) { return done(null, false) }
+        return done(null, username)
+      })
+    })
+  })
+)
+
+passport.serializeUser((user, done) => { done(null, user) })
+passport.deserializeUser((user, done) => { done(null, user) })
+
 app.use("/", indexRouter)
 app.use("/", express.static(path.join(__dirname, "public")))
 app.use(storageRouter.uriPath, storageRouter)
 app.use(storageRouter.uriPath, express.static(storageRouter.dirPath))
+app.use(authRouter.uriPath, authRouter)
 
 /*
 app.use(function(req, res, next) {

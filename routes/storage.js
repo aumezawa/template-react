@@ -3,6 +3,8 @@ import fs from "fs"
 import multer from "multer"
 import path from "path"
 
+import Auth from "./auth.js"
+
 const uriPath = "/data"
 const dirPath = path.join(__dirname, "..", "..", "data")
 
@@ -19,7 +21,7 @@ const upload = multer({
 })
 
 
-router.get("*", (req, res, next) => {
+router.get("*", Auth.isAuthenticated, (req, res, next) => {
   if (!req.query.cmd) {
     return next()
   }
@@ -130,7 +132,7 @@ router.get("*", (req, res, next) => {
   }
 })
 
-router.post("*", upload.single("file"), (req, res, next) => {
+router.post("*", Auth.isAuthenticated, upload.single("file"), (req, res, next) => {
   res.json({
     "result": "success"
   })
