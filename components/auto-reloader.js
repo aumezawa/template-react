@@ -11,29 +11,23 @@ export default class AutoReloader extends React.Component {
   }
 
   static get propTypes() {
-    return (
-      {
-        interval: PropTypes.number.isRequired
-      }
-    )
+    return ({
+      interval: PropTypes.number.isRequired
+    })
   }
 
   static get defaultProps() {
-    return (
-      {
-        interval: 0
-      }
-    )
+    return ({
+      interval: 0
+    })
   }
 
-  // client only
   componentDidMount() {
     if (this.state.count > 1) {
       this.timer = setTimeout(() => this.countdown(), 1000)
     }
   }
 
-  // client only
   componentDidUpdate() {
     if (this.state.count > 1) {
       this.timer = setTimeout(() => this.countdown(), 1000)
@@ -42,7 +36,6 @@ export default class AutoReloader extends React.Component {
     }
   }
 
-  // client only
   componentWillUnmount() {
     clearTimeout(this.timer)
   }
@@ -51,8 +44,8 @@ export default class AutoReloader extends React.Component {
     return (
       <div>
         <p>This page will be automatically reload after {this.state.count} seconds.</p>
-        <button type="button" className="btn btn-primary" onClick={e => this.reload()}>Reload</button>
-        <button type="button" className="btn btn-secondary" onClick={e => this.stop()}>Stop</button>
+        <button type="button" className="btn btn-primary" onClick={ e => this.reload() }>Reload</button>
+        <button type="button" className="btn btn-secondary" onClick={ e => this.stop() }>Stop</button>
       </div>
     )
   }

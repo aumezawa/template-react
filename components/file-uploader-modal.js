@@ -18,35 +18,31 @@ export default class FileUploaderModal extends React.Component {
   }
 
   static get propTypes() {
-    return (
-      {
-        path      : PropTypes.string.isRequired,
-        name      : PropTypes.string,
-        label     : PropTypes.string,
-        preFunc   : PropTypes.func,
-        postFunc  : PropTypes.func,
-        interval  : PropTypes.number
-      }
-    )
+    return ({
+      path      : PropTypes.string.isRequired,
+      name      : PropTypes.string,
+      label     : PropTypes.string,
+      preFunc   : PropTypes.func,
+      postFunc  : PropTypes.func,
+      interval  : PropTypes.number
+    })
   }
 
   static get defaultProps() {
-    return (
-      {
-        path      : undefined,
-        name      : "File Uploader",
-        label     : "Upload",
-        preFunc   : undefined,
-        postFunc  : undefined,
-        interval  : 3
-      }
-    )
+    return ({
+      path      : undefined,
+      name      : "File Uploader",
+      label     : "Upload",
+      preFunc   : undefined,
+      postFunc  : undefined,
+      interval  : 3
+    })
   }
 
   render() {
     return (
       <div>
-        <button type="button" className="btn btn-primary" data-toggle="modal" data-target="#modal-upload" onClick={() => this.opened()}>
+        <button type="button" className="btn btn-primary" data-toggle="modal" data-target="#modal-upload" onClick={ () => this.opened() }>
           Launch {this.props.name}
         </button>
 
@@ -54,21 +50,20 @@ export default class FileUploaderModal extends React.Component {
           <div className="modal-dialog modal-dialog-centered" role="document">
             <div className="modal-content">
               <div className="modal-header">
-                <h5 className="modal-title" id="modal-label">{this.props.name}</h5>
-                <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={() => this.hidden()}>
+                <h5 className="modal-title" id="modal-label">{ this.props.name }</h5>
+                <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={ () => this.hidden() }>
                   <span aria-hidden="true">&times;</span>
                 </button>
               </div>
               <div className="modal-body">
-                <div className="text-left">{this.message}</div>
+                <div className="text-left">{ this.message }</div>
                 <br />
-                <FileUploader path={this.props.path} label={this.props.label}
-                  indicator="parent" indicatorFunc={message => this.fileUploaded(message)}
-                  preFunc={() => this.preFunc()} postFunc={() => this.postFunc()} interval={this.props.interval}
-                />
+                <FileUploader path={ this.props.path } label={ this.props.label }
+                  indicator="parent" indicatorFunc={ message => this.fileUploaded(message) }
+                  preFunc={ () => this.preFunc() } postFunc={ () => this.postFunc() } interval={ this.props.interval } />
                 </div>
               <div className="modal-footer">
-                <button type="button" className="btn btn-secondary" data-dismiss="modal" onClick={() => this.hidden()}>Close</button>
+                <button type="button" className="btn btn-secondary" data-dismiss="modal" onClick={ () => this.hidden() }>Close</button>
               </div>
             </div>
           </div>
@@ -78,28 +73,22 @@ export default class FileUploaderModal extends React.Component {
   }
 
   opened() {
-    this.setState(
-      {
-        open: true
-      }
-    )
+    this.setState({
+      open: true
+    })
   }
 
   hidden() {
-    this.setState(
-      {
-        open: false
-      }
-    )
+    this.setState({
+      open: false
+    })
   }
 
   fileUploaded(message) {
     this.message = message
-    this.setState(
-      {
-        uploaded: true
-      }
-    )
+    this.setState({
+      uploaded: true
+    })
     if (!this.state.open) {
       alert(message)
     }
@@ -113,11 +102,9 @@ export default class FileUploaderModal extends React.Component {
 
   postFunc() {
     this.message = "Choose an upload file, then press [" + this.props.label + "] button."
-    this.setState(
-      {
-        uploaded: false
-      }
-    )
+    this.setState({
+      uploaded: false
+    })
     if (this.props.postFunc) {
       this.props.postFunc()
     }

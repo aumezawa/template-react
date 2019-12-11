@@ -8,9 +8,9 @@ import passportLocal from "passport-local"
 import path from "path"
 import session from "express-session"
 
-import indexRouter from "./routes/index"
-import storageRouter from "./routes/storage"
-import authRouter from "./routes/auth"
+import indexRouter from "./routes/index.js"
+import storageRouter from "./routes/storage.js"
+import authRouter from "./routes/auth.js"
 
 const app = express()
 
@@ -34,9 +34,13 @@ passport.use(new passportLocal.Strategy({
     passwordField: "password"
   }, (username, password, done) => {
     process.nextTick(() => {
-      fs.readFile(path.join(__dirname, "auth", "userlist.json"), (err, data) => {
-        if (err) { return done(null, false) }
-        if (password !== JSON.parse(data)[username]) { return done(null, false) }
+      fs.readFile(authRouter.localPath, (err, data) => {
+        if (err) {
+          return done(null, false)
+        }
+        if (password !== JSON.parse(data)[username]) {
+          return done(null, false)
+        }
         return done(null, username)
       })
     })

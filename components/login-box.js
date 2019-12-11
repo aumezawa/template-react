@@ -20,6 +20,7 @@ export default class LoginBox extends React.Component {
 
   static get propTypes() {
     return ({
+      welcomeMsg  : PropTypes.string,
       redirectSec : PropTypes.number,
       description : PropTypes.string,
       minLength   : PropTypes.number,
@@ -30,7 +31,8 @@ export default class LoginBox extends React.Component {
 
   static get defaultProps() {
     return ({
-      redirectSec : 5,
+      welcomeMsg  : "Welcome to my server!!!",
+      redirectSec : 3,
       description : "(between 4 - 16 characters with [0-9a-zA-Z])",
       minLength   : 4,
       maxLength   : 16,
@@ -49,6 +51,11 @@ export default class LoginBox extends React.Component {
   render() {
     return (
       <div>
+        <div className={ ClassNames({ "collapse": true, "show": !this.state.execDone }) }>
+          <div className={ ClassNames({ "card": true, "card-body": true, "bg-light": true }) }>
+            { this.props.welcomeMsg }
+          </div>
+        </div>
         <div className={ ClassNames({ "collapse": true, "show": this.state.execDone && this.state.execSuccess }) }>
           <div className={ ClassNames({ "card": true, "card-body": true, "text-white": true, "bg-success": true }) }>
             Succeeded to login as "{ this.username }". Will redirect automatically in { this.state.redirectSec } sec.
@@ -59,6 +66,7 @@ export default class LoginBox extends React.Component {
             Failed to login as "{ this.username }"...
           </div>
         </div>
+        <br />
         <form>
           <div className="form-group">
             <label htmlFor="usernameInput">Username { this.props.description }</label>
@@ -78,7 +86,7 @@ export default class LoginBox extends React.Component {
     var uri = location.href
     var params = new URLSearchParams()
     params.append("username", this.username)
-    params.append("password", crypto.createHash(this.props.hashMode).update(this.password, "utf8").digest("hex"))
+    params.append("password", crypto.createHash(this.props.hashMode).update(this.username + this.password, "utf8").digest("hex"))
 
     this.setState({
       execDone: false

@@ -8,7 +8,7 @@ const filepath = path.join(__dirname, filename)
 
 var override = false
 process.argv.forEach(arg => {
-  if (arg === "--override") {
+  if (arg === "-o" || arg === "--override") {
     override = true
   }
 })
@@ -54,11 +54,12 @@ rl.question("", (password) => {
 
   // Note: create a new file
   var writeData = JSON.stringify({
-    "root": crypto.createHash("sha256").update(password, "utf8").digest("hex")
+    "root": crypto.createHash("sha256").update("root" + password, "utf8").digest("hex")
   })
   try {
     fs.writeFileSync(filepath, writeData)
     console.log("Info : User database file was created successfully.")
+    console.log("Info : Path = " + filepath)
   } catch {
     console.log("Error: User database file was not created...")
   }

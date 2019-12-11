@@ -34,13 +34,14 @@ router.get("*", Auth.isAuthenticated, (req, res, next) => {
         if (!stats.isFile()) {
           throw new FileError('no file exists')
         }
-        res.json({
-          "fileName"  : path.basename(req.path),
-          "lastUpdate": stats.mtime
+        return res.json({
+          success   : true,
+          fileName  : path.basename(req.path),
+          lastUpdate: stats.mtime
         })
       } catch {
-        res.json({
-          "fileName": "none"
+        return res.json({
+          success: false
         })
       }
       break
@@ -62,43 +63,46 @@ router.get("*", Auth.isAuthenticated, (req, res, next) => {
             if (node !== reqPath) {
               dirList.push(node)
             }
-            fs.readdirSync(node).forEach(name => tmpList.push(path.join(node, name)))
+            fs.readdirSync(node).forEach(name => {
+              tmpList.push(path.join(node, name))
+            })
           }
         }
-        res.json({
-          "dirName" : req.path,
-          "fileList":
+        return res.json({
+          success : true,
+          dirName : req.path,
+          fileList:
             fileList.map(file => {
               return file.replace(dirPath, "").replace(/\\/g, "/")
             }),
-          "dirList" :
+          dirList :
             dirList.map(dir => {
               return dir.replace(dirPath, "").replace(/\\/g, "/")
             }),
-          "lsdir"   :
+          lsdir   :
             fs.readdirSync(reqPath).map(name => {
               return ({
-                "name": name,
-                "type": fs.statSync(path.join(reqPath, name)).isFile() ? "file" : "dir"
+                name: name,
+                file: fs.statSync(path.join(reqPath, name)).isFile()
               })
             })
         })
       } catch {
-        res.json({
-          "dirName": "none"
+        return res.json({
+          success: false
         })
       }
       break
 
     case "mkdir":
       try {
-        fs.mkdirSync(reqPath, {recursive: true})
-        res.json({
-          "result": "success"
+        fs.mkdirSync(reqPath, { recursive: true })
+        return res.json({
+          success: true
         })
       } catch {
-        res.json({
-          "result": "failure"
+        return res.json({
+          success: false
         })
       }
       break
@@ -117,24 +121,26 @@ router.get("*", Auth.isAuthenticated, (req, res, next) => {
           }
         }
         dirList.forEach(dir => fs.rmdirSync(dir))
-        res.json({
-          "result": "success"
+        return res.json({
+          success: true
         })
       } catch {
-        res.json({
-          "result": "failure"
+        return res.json({
+          success: false
         })
       }
       break
 
     default:
-      next()
+      return res.json({
+        success: false
+      })
   }
 })
 
 router.post("*", Auth.isAuthenticated, upload.single("file"), (req, res, next) => {
-  res.json({
-    "result": "success"
+  return res.json({
+    success: true
   })
 })
 

@@ -2,7 +2,7 @@ import React from "react"
 import ReactDOM from "react-dom"
 
 import "bootstrap"
-import "./bootstrap-custom.scss"
+import "./css/bootstrap-custom.scss"
 //import "bootstrap/dist/css/bootstrap.min.css"
 
 import FileUploaderModal from "./file-uploader-modal.js"
@@ -17,7 +17,8 @@ export default class CsrMain extends React.Component {
   render() {
     return (
       <div className="text-center">
-        This is the main component!
+        <p>This is the main component!</p>
+        <FileUploaderModal path="/data" />
       </div>
     )
   }
