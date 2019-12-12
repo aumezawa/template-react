@@ -84,7 +84,7 @@ export default class FileUploader extends React.Component {
     // replace separators to correctly extract basename on windows path
     this.filename = path.basename(event.target.value.replace(/\\/g, "/"))
     if (this.filename === "") {
-      this.formReset()
+      this.resetForm()
     } else {
       this.file = event.target.files[0]
       this.setState({
@@ -132,14 +132,14 @@ export default class FileUploader extends React.Component {
         return sleep(this.props.interval, res)
       })
       .then((res) => {
-        this.formReset()
+        this.resetForm()
         if (this.props.postFunc) {
           this.props.postFunc()
         }
       })
   }
 
-  formReset() {
+  resetForm() {
     this.filename = ""
     this.file = undefined
     this.form.reset()

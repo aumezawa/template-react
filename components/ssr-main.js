@@ -14,7 +14,8 @@ export default class SsrMain extends React.Component {
       desc    : PropTypes.string,
       author  : PropTypes.string,
       script  : PropTypes.string,
-      id      : PropTypes.string
+      id      : PropTypes.string,
+      user    : PropTypes.string
     })
   }
 
@@ -25,7 +26,8 @@ export default class SsrMain extends React.Component {
       desc    : "Template of a project with react",
       author  : "aume",
       script  : "/js/bundle.js",
-      id      : "csr-main"
+      id      : "csr-main",
+      user    : "anonymous"
     })
   }
 
@@ -41,7 +43,7 @@ export default class SsrMain extends React.Component {
 
         <body>
           <div className="container">
-            <div id={ this.props.id } />
+            <div id={ this.props.id } user={ this.props.user } />
           </div>
           <script src={ this.props.script }></script>
         </body>
