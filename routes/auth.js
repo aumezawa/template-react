@@ -7,22 +7,27 @@ import React from "react"
 import ReactDOMServer from "react-dom/server"
 import SsrMain from "../components/ssr-main.js"
 
+var authEnabled = true
+process.argv.forEach(arg => {
+  if (arg === "--noAuth") {
+    authEnabled = false
+  }
+})
+
 const uriPath = "/auth"
 const dirPath = path.join(__dirname, "..", "auth")
 const localPath = path.join(__dirname, "..", "auth", "userlist.json")
 const isAuthenticated = (req, res, next) => {
-  if (req.isAuthenticated()) {
-    return next()
-  } else {
+  if (authEnabled && !req.isAuthenticated()) {
     return res.redirect(uriPath + "/form/login")
   }
+  return next()
 }
 const hadAuthenticated = (req, res, next) => {
-  if (req.isAuthenticated()) {
+  if (authEnabled && req.isAuthenticated()) {
     return res.redirect("/")
-  } else {
-    return next()
   }
+  return next()
 }
 const isRoot = (req, res, next) => {
   if (req.user === "root") {
