@@ -30,7 +30,7 @@ export default class RegisterBox extends React.Component {
 
   static get defaultProps() {
     return ({
-      welcomeMsg  : "Register a new user!!!",
+      welcomeMsg  : "Register a new user.",
       description : "(between 4 - 16 characters with [0-9a-zA-Z])",
       minLength   : 4,
       maxLength   : 16,

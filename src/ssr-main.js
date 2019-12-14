@@ -1,6 +1,8 @@
 import React from "react"
 import PropTypes from "prop-types"
 
+import project from "../package.json"
+
 export default class SsrMain extends React.Component {
 
   constructor(props) {
@@ -10,11 +12,12 @@ export default class SsrMain extends React.Component {
   static get propTypes() {
     return ({
       lang    : PropTypes.string,
-      title   : PropTypes.string,
+      project : PropTypes.string,
       desc    : PropTypes.string,
       author  : PropTypes.string,
+      version : PropTypes.string,
       script  : PropTypes.string,
-      id      : PropTypes.string,
+      page    : PropTypes.string,
       user    : PropTypes.string
     })
   }
@@ -22,11 +25,12 @@ export default class SsrMain extends React.Component {
   static get defaultProps() {
     return ({
       lang    : "ja",
-      title   : "template-react",
-      desc    : "Template of a project with react",
-      author  : "aume",
+      project : project.name,
+      desc    : project.description,
+      author  : project.author,
+      version : project.version,
       script  : "/js/bundle.js",
-      id      : "csr-main",
+      page    : "main",
       user    : "anonymous"
     })
   }
@@ -36,14 +40,14 @@ export default class SsrMain extends React.Component {
       <html lang={ this.props.lang }>
         <head>
           <meta charSet="utf-8" />
-          <title>{ this.props.title }</title>
+          <title>{ this.props.project }</title>
           <meta name="description" content={ this.props.desc } />
           <meta name="author" content={ this.props.author } />
         </head>
 
         <body>
           <div className="container">
-            <div id={ this.props.id } user={ this.props.user } />
+            <div id="csr-main" project={ this.props.project } page={ this.props.page } user={ this.props.user } />
           </div>
           <script src={ this.props.script }></script>
         </body>

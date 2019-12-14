@@ -4,7 +4,7 @@ import PropTypes from "prop-types"
 import axios from "axios"
 import path from "path"
 
-import sleep from "./lib/sleep.js"
+import sleep from "../lib/sleep.js"
 
 export default class FileUploader extends React.Component {
 

@@ -4,7 +4,7 @@ const webpack = require("webpack");
 module.exports = {
   mode: "development",
   entry: {
-    bundle: path.join(__dirname, "components", "csr-main.js"),
+    bundle: path.join(__dirname, "src", "csr-main.js"),
   },
   output: {
     filename: "[name].js",

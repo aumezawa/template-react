@@ -5,7 +5,7 @@ import path from "path"
 
 import React from "react"
 import ReactDOMServer from "react-dom/server"
-import SsrMain from "../components/ssr-main.js"
+import SsrMain from "../src/ssr-main.js"
 
 var authEnabled = true
 process.argv.forEach(arg => {
@@ -42,7 +42,7 @@ const router = express.Router()
 router.get("/form/login", hadAuthenticated, (req, res, next) => {
   res.send(
     ReactDOMServer.renderToString(
-      <SsrMain title="Login" desc="Login form" author="aume" id="login" />
+      <SsrMain page="login" />
     )
   )
 })
@@ -78,7 +78,7 @@ router.get("/form/logout", (req, res, next) => {
 router.get("/form/register", isAuthenticated, isRoot, (req, res, next) => {
   res.send(
     ReactDOMServer.renderToString(
-      <SsrMain title="Register" desc="Register form" author="aume" id="register" />
+      <SsrMain page="register" />
     )
   )
 })

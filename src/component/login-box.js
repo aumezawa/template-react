@@ -31,7 +31,7 @@ export default class LoginBox extends React.Component {
 
   static get defaultProps() {
     return ({
-      welcomeMsg  : "Welcome to my server!!!",
+      welcomeMsg  : "Welcome!",
       redirectSec : 3,
       description : "(between 4 - 16 characters with [0-9a-zA-Z])",
       minLength   : 4,
