@@ -20,6 +20,18 @@ const upload = multer({
   })
 })
 
+// For Table Test - Start
+router.get("/summary", Auth.isAuthenticated, (req, res, next) => {
+  process.nextTick(() => {
+    fs.readFile(path.join(__dirname, "..", "..", "data", "summary.json"), (err, data) => {
+      if (err) {
+        return res.json({})
+      }
+      return res.json(JSON.parse(data))
+    })
+  })
+})
+// For Table Test - End
 
 router.get("*", Auth.isAuthenticated, (req, res, next) => {
   if (!req.query.cmd) {

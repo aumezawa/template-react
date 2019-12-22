@@ -1,1 +1,32 @@
 @import "~bootstrap/scss/bootstrap";
+
+// for Header-Fixed Table
+.table-fixed thead th {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.table-fixed th:first-child {
+  position: -webkit-sticky;
+  position: sticky;
+  left: 0;
+  z-index: 2;
+}
+
+.table-fixed thead th:first-child {
+  z-index: 3;
+}
+
+.table-fixed td.content {
+  word-break: break-all;
+}
+
+.table-fixed {
+  width: 100%;
+}
+
+.table-fixed th span.badge {
+  cursor: pointer
+}

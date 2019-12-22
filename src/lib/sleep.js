@@ -1,5 +1,7 @@
-module.exports = (waitSec, pass) => {
+export default (waitSec, next) => {
   return new Promise((resolve) => {
-    setTimeout(() => { resolve(pass) }, waitSec * 1000)
+    setTimeout(() => {
+      resolve(next)
+    }, waitSec * 1000)
   })
 }

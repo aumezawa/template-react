@@ -1,13 +1,19 @@
 import React from "react"
 import PropTypes from "prop-types"
 
+// For Table Test - Start
+import axios from "axios"
+// For Table Test - End
+
 import FileUploaderModal from "../component/file-uploader-modal.js"
 import Navigator from "../component/navigator.js"
+import Table from "../component/table.js"
 
 export default class MainPage extends React.Component {
 
   constructor(props) {
     super(props)
+    this.data = {}
   }
 
   static get propTypes() {
@@ -24,6 +30,23 @@ export default class MainPage extends React.Component {
     })
   }
 
+  // For Table Test - Start
+  componentDidMount() {
+    this.getFile()
+  }
+
+  getFile() {
+    const uri = location.protocol + "//" + location.host + "/data/summary"
+    axios.get(uri)
+      .then((res) => {
+        this.data = res.data
+        this.setState({})
+      })
+      .catch((err) => {
+      })
+  }
+  // For Table Test - End
+
   render() {
     return (
       <div>
@@ -31,6 +54,7 @@ export default class MainPage extends React.Component {
         <div className="text-center">
           <p>Hello { this.props.user }! This is the main page.</p>
           <FileUploaderModal path="/data" />
+          <Table inputData={ this.data } />
         </div>
       </div>
     )
