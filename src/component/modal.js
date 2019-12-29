@@ -3,10 +3,11 @@ import PropTypes from "prop-types"
 
 import uniqueId from "../lib/uniqueId.js"
 
-export default class Modal extends React.Component {
+export default class Modal extends React.PureComponent {
 
   constructor(props) {
     super(props)
+    this.state = {}
     this.id = {
       label: uniqueId()
     }

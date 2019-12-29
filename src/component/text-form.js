@@ -12,11 +12,13 @@ export default class TextForm extends React.PureComponent {
     this.data = {
       text: ""
     }
+    this.input = {}
   }
 
   static get propTypes() {
     return ({
       label     : PropTypes.string,
+      type      : PropTypes.string,
       className : PropTypes.string,
       disabled  : PropTypes.bool,
       onChange  : PropTypes.func,
@@ -27,6 +29,7 @@ export default class TextForm extends React.PureComponent {
   static get defaultProps() {
     return ({
       label     : "Text:",
+      type      : "text",
       className : "",
       disabled  : false,
       onChange  : undefined,
@@ -42,8 +45,9 @@ export default class TextForm extends React.PureComponent {
             <span className="input-group-text">{ this.props.label }</span>
           </div>
           <input
+            ref={ ref => this.input.text = ref }
             className={ ClassNames({ "form-control": true, "text-monospace": true, "is-invalid": !this.state.valid }) }
-            type="text"
+            type={ this.props.type }
             disabled={ this.props.disabled }
             onChange={ e => this.handleChangeText(e) }
           />
@@ -53,27 +57,41 @@ export default class TextForm extends React.PureComponent {
   }
 
   isValid() {
-    let valid = true
     if (this.data.text === "") {
-      valid = false
+      return false
     }
     if (this.props.validate && !this.props.validate(this.data.text)) {
-      valid = false
+      return false
     }
-    return valid
+    return true
   }
 
   handleChangeText(event) {
     this.data.text = event.target.value
 
-    let valid = this.isValid()
+    let newValid = this.isValid()
     this.setState({
-      valid: valid
+      valid: newValid
     })
 
     if (this.props.onChange) {
-      this.props.onChange(valid, this.data)
+      this.props.onChange(newValid, this.data)
     }
+  }
+
+  reset() {
+    this.input.text.value = ""
+
+    this.data = {
+      text: ""
+    }
+
+    let newValid = false
+    this.setState({
+      valid: newValid
+    })
+
+    return newValid
   }
 
 }

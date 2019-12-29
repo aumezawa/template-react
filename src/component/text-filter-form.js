@@ -1,15 +1,8 @@
 import React from "react"
 import PropTypes from "prop-types"
-import ClassNames from "classnames"
 
 import SelectForm from "./select-form.js"
 import TextForm from "./text-form.js"
-
-export const MODE_INCLUDED     = 0
-export const MODE_NOT_INCLUDED = 1
-export const MODE_REGEX        = 2
-
-const modeOptions = ["Be included", "Not be included", "Regex"]
 
 export default class TextFilterForm extends React.PureComponent {
 
@@ -38,57 +31,92 @@ export default class TextFilterForm extends React.PureComponent {
     })
   }
 
-  componentDidMount() {
-    this.data.mode = this.children.mode.data.index
-    this.data.condition = this.children.text.data.text
-    this.setState({
-      valid: this.isValid([])
+  static get CONST() {
+    return ({
+      MODE_INCLUDED     : 0,
+      MODE_NOT_INCLUDED : 1,
+      MODE_REGEX        : 2
     })
+  }
+
+  static get modeOptions() {
+    return ["Be included", "Not be included", "Regex"]
+  }
+
+  componentDidMount() {
+    this.init()
   }
 
   render() {
     return (
       <div className={ this.props.className }>
-        <SelectForm ref={ ref => this.children.mode = ref } label="Mode:" options={ modeOptions } disabled={ this.props.disabled } onChange={ (v, d) => this.handleChangeMode(v, d) } />
-        <TextForm ref={ ref => this.children.text = ref } label="Condition:" disabled={ this.props.disabled } onChange={ (v, d) => this.handleChangeText(v, d) } />
+        <SelectForm
+          ref={ ref => this.children.mode = ref }
+          label="Mode:"
+          options={ TextFilterForm.modeOptions }
+          disabled={ this.props.disabled }
+          onChange={ (valid, data) => this.handleChangeMode(valid, data) }
+        />
+        <TextForm
+          ref={ ref => this.children.text = ref }
+          label="Condition:"
+          disabled={ this.props.disabled }
+          onChange={ (valid, data) => this.handleChangeText(valid, data) }
+        />
       </div>
     )
   }
 
-  isValid(exceptKeys) {
-    let valid = true
-    Object.keys(this.children).forEach(key => {
-      if (exceptKeys.indexOf(key) === -1) {
-        valid = valid && this.children[key].state.valid
-      }
+  init(newValid = this.isValid()) {
+    this.data = {
+      mode      : this.children.mode.data.index,
+      condition : this.children.text.data.text
+    }
+    this.setState({
+      valid: newValid
     })
-    return valid
   }
 
-  handleChangeMode(v, data) {
+  isValid(valid = true, exceptKeys = []) {
+    return Object.keys(this.children).reduce((acc, key) => {
+      if (exceptKeys.includes(key)) {
+        return acc
+      } else {
+        return acc && this.children[key].state.valid
+      }
+    }, valid)
+  }
+
+  handleChangeMode(valid, data) {
     this.data.mode = data.index
 
-    let valid = v && this.isValid(["mode"])
+    let newValid = this.isValid(valid, ["mode"])
     this.setState({
-      valid: valid
+      valid: newValid
     })
 
     if (this.props.onChange) {
-      this.props.onChange(valid, this.data)
+      this.props.onChange(newValid, this.data)
     }
   }
 
-  handleChangeText(v, data) {
+  handleChangeText(valid, data) {
     this.data.condition = data.text
 
-    let valid = v && this.isValid(["text"])
+    let newValid = this.isValid(valid, ["text"])
     this.setState({
-      valid: valid
+      valid: newValid
     })
 
     if (this.props.onChange) {
-      this.props.onChange(valid, this.data)
+      this.props.onChange(newValid, this.data)
     }
+  }
+
+  reset() {
+    this.init(Object.keys(this.children).reduce((acc, key) => {
+      return this.children[key].reset() && acc
+    }, true))
   }
 
 }

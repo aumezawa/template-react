@@ -2,7 +2,7 @@ import React from "react"
 import PropTypes from "prop-types"
 import ClassNames from "classnames"
 
-import DateFormSwitch from "./date-form-switch.js"
+import DateForm from "./date-form.js"
 
 export default class DateFilterForm extends React.PureComponent {
 
@@ -32,66 +32,80 @@ export default class DateFilterForm extends React.PureComponent {
   }
 
   componentDidMount() {
-    this.data.from = this.children.from.data.valid ? this.children.from.data.date : new Date("Invalid Date")
-    this.data.to = this.children.to.data.valid ? this.children.to.data.date : new Date("Invalid Date")
-    this.setState({
-      valid: this.isValid([])
-    })
+    this.init()
   }
 
   render() {
     return (
       <div className={ this.props.className }>
-        <DateFormSwitch
+        <DateForm
           ref={ ref => this.children.from = ref }
           label="From:"
+          muteable={ true }
           disabled={ this.props.disabled }
-          onChange={ (v, d) => this.handleChangeFrom(v, d) }
+          onChange={ (valid, date) => this.handleChangeFrom(valid, date) }
         />
-        <DateFormSwitch
+        <DateForm
           ref={ ref => this.children.to = ref }
           label="To:"
+          muteable={ true }
           disabled={ this.props.disabled }
-          onChange={ (v, d) => this.handleChangeTo(v, d) }
+          onChange={ (valid, date) => this.handleChangeTo(valid, date) }
         />
       </div>
     )
   }
 
-  isValid(exceptKeys) {
-    let valid = true
-    Object.keys(this.children).forEach(key => {
-      if (exceptKeys.indexOf(key) === -1) {
-        valid = valid && this.children[key].state.valid
-      }
+  init(newValid = this.isValid()) {
+    this.data = {
+      from: this.children.from.data.valid ? this.children.from.data.date : new Date("Invalid Date"),
+      to  : this.children.to.data.valid ? this.children.to.data.date : new Date("Invalid Date")
+    }
+    this.setState({
+      valid: newValid
     })
-    return valid
   }
 
-  handleChangeFrom(v, data) {
+  isValid(valid = true, exceptKeys = []) {
+    return Object.keys(this.children).reduce((acc, key) => {
+      if (exceptKeys.includes(key)) {
+        return acc
+      } else {
+        return acc && this.children[key].state.valid
+      }
+    }, valid)
+  }
+
+  handleChangeFrom(valid, data) {
     this.data.from = data.valid ? data.date : new Date("Invalid Date")
 
-    let valid = v && this.isValid(["from"])
+    let newValid = this.isValid(valid, ["from"])
     this.setState({
-      valid: valid
+      valid: newValid
     })
 
     if (this.props.onChange) {
-      this.props.onChange(valid, this.data)
+      this.props.onChange(newValid, this.data)
     }
   }
 
-  handleChangeTo(v, data) {
+  handleChangeTo(valid, data) {
     this.data.to = data.valid ? data.date : new Date("Invalid Date")
 
-    let valid = v && this.isValid(["to"])
+    let newValid = this.isValid(valid, ["to"])
     this.setState({
-      valid: valid
+      valid: newValid
     })
 
     if (this.props.onChange) {
-      this.props.onChange(valid, this.data)
+      this.props.onChange(newValid, this.data)
     }
+  }
+
+  reset() {
+    this.init(Object.keys(this.children).reduce((acc, key) => {
+      return this.children[key].reset() && acc
+    }, true))
   }
 
 }

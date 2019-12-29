@@ -12,6 +12,7 @@ export default class SelectForm extends React.PureComponent {
     this.data = {
       index: 0
     }
+    this.input = {}
   }
 
   static get propTypes() {
@@ -44,6 +45,7 @@ export default class SelectForm extends React.PureComponent {
             <span className="input-group-text">{ this.props.label }</span>
           </div>
           <select
+            ref={ ref => this.input.select = ref }
             className={ ClassNames({ "form-control": true, "is-invalid": !this.state.valid }) }
             disabled={ this.props.disabled }
             onChange={ e => this.handleChangeSelect(e) }
@@ -60,24 +62,38 @@ export default class SelectForm extends React.PureComponent {
   }
 
   isValid() {
-    let valid = true
     if (this.props.validate && !this.props.validate(this.data.index)) {
-      valid = false
+      return false
     }
-    return valid
+    return true
   }
 
   handleChangeSelect(event) {
     this.data.index = Number(event.target.value)
 
-    let valid = this.isValid()
+    let newValid = this.isValid()
     this.setState({
-      valid: valid
+      valid: newValid
     })
 
     if (this.props.onChange) {
-      this.props.onChange(valid, this.data)
+      this.props.onChange(newValid, this.data)
     }
+  }
+
+  reset() {
+    this.input.select.value = "0"
+
+    this.data = {
+      index: 0
+    }
+
+    let newValid = this.props.validate ? this.props.validate(0) : true
+    this.setState({
+      valid: newValid
+    })
+
+    return newValid
   }
 
 }

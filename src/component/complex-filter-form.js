@@ -2,17 +2,9 @@ import React from "react"
 import PropTypes from "prop-types"
 import ClassNames from "classnames"
 
+import DateFilterForm from "./date-filter-form.js"
 import SelectForm from "./select-form.js"
 import TextFilterForm from "./text-filter-form.js"
-import DateFilterForm from "./date-filter-form.js"
-
-export const TYPE_TEXT = 0
-export const TYPE_DATE = 1
-export const MODE_INCLUDED     = TextFilterForm.MODE_INCLUDED
-export const MODE_NOT_INCLUDED = TextFilterForm.MODE_NOT_INCLUDED
-export const MODE_REGEX        = TextFilterForm.MODE_REGEX
-
-const typeOptions = ["Text", "Date"]
 
 export default class ComplexFilterForm extends React.PureComponent {
 
@@ -46,16 +38,22 @@ export default class ComplexFilterForm extends React.PureComponent {
     })
   }
 
-  componentDidMount() {
-    this.data.type = this.children.type.data.index
-    this.data.mode = this.children.text.data.mode
-    this.data.condition = this.children.text.data.condition
-    this.data.from = this.children.date.data.from
-    this.data.to = this.children.date.data.to
-    this.setState({
-      valid : this.isValid([]),
-      type  : this.data.type
+  static get CONST() {
+    return ({
+      TYPE_TEXT         : 0,
+      TYPE_DATE         : 1,
+      MODE_INCLUDED     : TextFilterForm.CONST.MODE_INCLUDED,
+      MODE_NOT_INCLUDED : TextFilterForm.CONST.MODE_NOT_INCLUDED,
+      MODE_REGEX        : TextFilterForm.CONST.MODE_REGEX
     })
+  }
+
+  static get typeOptions() {
+    return ["Text", "Date"]
+  }
+
+  componentDidMount() {
+    this.init()
   }
 
   render() {
@@ -64,21 +62,21 @@ export default class ComplexFilterForm extends React.PureComponent {
         <SelectForm
           ref={ ref => this.children.type = ref }
           label={ "Data Type:" }
-          options={ typeOptions }
+          options={ ComplexFilterForm.typeOptions }
           disabled={ this.props.disabled }
-          onChange={ (v, d) => this.handleChangeType(v, d) }
+          onChange={ (valid, data) => this.handleChangeType(valid, data) }
         />
         <TextFilterForm
           ref={ ref => this.children.text = ref }
-          className={ ClassNames({ "d-none": this.state.type !== TYPE_TEXT }) }
+          className={ ClassNames({ "d-none": this.state.type !== ComplexFilterForm.CONST.TYPE_TEXT }) }
           disabled={ this.props.disabled }
-          onChange={ (v, d) => this.handleChangeText(v, d) }
+          onChange={ (valid, data) => this.handleChangeText(valid, data) }
         />
         <DateFilterForm
           ref={ ref => this.children.date = ref }
-          className={ ClassNames({ "d-none": this.state.type !== TYPE_DATE }) }
+          className={ ClassNames({ "d-none": this.state.type !== ComplexFilterForm.CONST.TYPE_DATE }) }
           disabled={ this.props.disabled }
-          onChange={ (v, d) => this.handleChangeDate(v, d) }
+          onChange={ (valid, data) => this.handleChangeDate(valid, data) }
         />
         <div className="form-row justify-content-center">
           <div className="col-auto">
@@ -105,55 +103,74 @@ export default class ComplexFilterForm extends React.PureComponent {
     )
   }
 
-  isValid(exceptKeys) {
-    let valid = true
-    Object.keys(this.children).forEach(key => {
-      if (exceptKeys.indexOf(key) === -1) {
-        valid = valid && this.children[key].state.valid
-      }
+  init(newValid = this.isValid()) {
+    this.data = {
+      type      : this.children.type.data.index,
+      mode      : this.children.text.data.mode,
+      condition : this.children.text.data.condition,
+      from      : this.children.date.data.from,
+      to        : this.children.date.data.to
+    }
+    this.setState({
+      valid : newValid,
+      type  : this.data.type
     })
-    return valid
   }
 
-  handleChangeType(v, data) {
+  isValid(valid = true, exceptKeys = []) {
+    return Object.keys(this.children).reduce((acc, key) => {
+      if (exceptKeys.includes(key)) {
+        return acc
+      } else {
+        return acc && this.children[key].state.valid
+      }
+    }, valid)
+  }
+
+  handleChangeType(valid, data) {
     this.data.type = data.index
 
-    let valid = (this.data.type === TYPE_TEXT) ? v && this.isValid(["type", "date"]) : v && this.isValid(["type", "text"])
+    let newValid
+    if (this.data.type === ComplexFilterForm.CONST.TYPE_TEXT) {
+      newValid = this.isValid(valid, ["type", "date"])
+    } else {
+      newValid = this.isValid(valid, ["type", "text"])
+    }
     this.setState({
-      valid : valid,
+      valid : newValid,
       type  : this.data.type
     })
 
     if (this.props.onChange) {
-      this.props.onChange(valid, this.data)
+      this.props.onChange(newValid, this.data)
     }
   }
 
-  handleChangeText(v, data) {
+  handleChangeText(valid, data) {
     this.data.mode = data.mode
     this.data.condition = data.condition
 
-    let valid = v && this.isValid(["text", "date"])
+    let newValid = this.isValid(valid, ["text", "date"])
     this.setState({
-      valid : valid
+      valid : newValid
     })
 
     if (this.props.onChange) {
-      this.props.onChange(valid, this.data)
+      this.props.onChange(newValid, this.data)
     }
   }
 
-  handleChangeDate(v, data) {
+  handleChangeDate(valid, data) {
     this.data.from = data.from
     this.data.to = data.to
 
-    let valid = v && this.isValid(["text", "date"])
+    let newValid = this.isValid(valid, ["text", "date"])
     this.setState({
-      valid : valid
+      valid : newValid
     })
 
     if (this.props.onChange) {
-      this.props.onChange(valid, this.data)
+      this.props.onChange(newValid, this.data)
     }
   }
 
@@ -167,6 +184,12 @@ export default class ComplexFilterForm extends React.PureComponent {
     if (this.props.onClear) {
       this.props.onClear()
     }
+  }
+
+  reset() {
+    this.init(Object.keys(this.children).reduce((acc, key) => {
+      return this.children[key].reset() && acc
+    }, true))
   }
 
 }

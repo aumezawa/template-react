@@ -22,17 +22,17 @@ export default class Table extends React.PureComponent {
 
   static get propTypes() {
     return ({
-      inputData : PropTypes.object.isRequired,
-      small     : PropTypes.bool,
-      height    : PropTypes.string,
+      source: PropTypes.object.isRequired,
+      small : PropTypes.bool,
+      height: PropTypes.string,
     })
   }
 
   static get defaultProps() {
     return ({
-      inputData : undefined,
-      small     : false,
-      height    : "80%",
+      source: undefined,
+      small : false,
+      height: "80%",
     })
   }
 
@@ -46,10 +46,11 @@ export default class Table extends React.PureComponent {
           body={ () =>
             <ComplexFilterForm
               onSubmit={ data => this.handleSubmitFilter(data) }
-              onClear={() => this.handleClearFilter() }
+              onClear={ () => this.handleClearFilter() }
             />
           }
         />
+        { this.renderTitle() }
         <div className="table-responsive" style={ { height: this.props.height } }>
           <table className={ ClassNames({ "table": true, "table-fixed": true, "table-hover": true, "table-sm": this.props.small }) }>
             <thead>{ this.renderHeader() }</thead>
@@ -61,11 +62,22 @@ export default class Table extends React.PureComponent {
     )
   }
 
+  renderTitle() {
+    let title
+    try {
+      const format = this.props.source.format
+      title = this.props.source.format.title
+    } catch {
+      title = "Untitled"
+    }
+    return <h5>{ title }</h5>
+  }
+
   renderHeader() {
     let header
 
     try {
-      const format = this.props.inputData.format
+      const format = this.props.source.format
       header = []
       if (format.hasHeader) {
         if (format.hasIndex) {
@@ -78,9 +90,9 @@ export default class Table extends React.PureComponent {
               <span
                 className={ ClassNames({ "badge": true, "badge-light": !(key in this.filter), "badge-success": (key in this.filter) }) }
                 key={ key }
+                title={ key }
                 data-toggle="modal"
                 data-target={ "#" + this.id.modal }
-                title={ key }
                 onClick={ e => this.handleClickFilter(e) }
               >
                 Filter
@@ -100,20 +112,25 @@ export default class Table extends React.PureComponent {
     let body
 
     try {
-      const format = this.props.inputData.format
-      const data = this.props.inputData.data
+      const format = this.props.source.format
+      const data = this.props.source.data
       body = data.map((datum, index) => {
         let line = []
-        let display = true
-        format.keys.forEach(key => {
-          display = display && this.isDisplay(key, datum[key])
-        })
+        let display = format.keys.reduce((acc, key) => {
+          return acc && this.isDisplay(key, datum[key])
+        }, true)
         if (format.hasIndex) {
           line = [<th scope="row" className="text-right text-monospace" key={ "idx" + index }>{ (index + 1) + ":" }</th>]
         }
         line = line.concat(format.keys.map(key => {
           return (
-            <td scope="row" className={ ClassNames({ "text-monospace": true, "content": key === format.contentKey }) } key={ key + index } >{ datum[key] }</td>
+            <td
+              scope="row"
+              className={ ClassNames({ "text-monospace": true, "content": key === format.contentKey }) }
+              key={ key + index }
+            >
+              { datum[key] }
+            </td>
           )
         }))
         return <tr className={ ClassNames({ "d-none": !display }) } key={ index }>{ line }</tr>
@@ -135,42 +152,30 @@ export default class Table extends React.PureComponent {
     }
 
     switch (this.filter[key].type) {
-      case 0:
-      //case ComplexFilterForm.TYPE_TEXT:
+      case ComplexFilterForm.CONST.TYPE_TEXT:
         switch (this.filter[key].mode) {
-          case 0:
-          //case ComplexFilterForm.MODE_INCLUDED:
-            return (datum.indexOf(this.filter[key].condition) >= 0) ? true : false
-          case 1:
-          //case ComplexFilterForm.MODE_NOT_INCLUDED:
-            return (datum.indexOf(this.filter[key].condition) === -1) ? true : false
-          case 2:
-          //case ComplexFilterForm.MODE_REGEX:
+          case ComplexFilterForm.CONST.MODE_INCLUDED:
+            return datum.includes(this.filter[key].condition) ? true : false
+          case ComplexFilterForm.CONST.MODE_NOT_INCLUDED:
+            return !datum.includes(this.filter[key].condition) ? true : false
+          case ComplexFilterForm.CONST.MODE_REGEX:
             let re = new RegExp(this.filter[key].condition)
             return (re.exec(datum) !== null) ? true : false
           default:
             return false
         }
 
-      case 1:
-      //case ComplexFilterForm.TYPE_DATE:
+      case ComplexFilterForm.CONST.TYPE_DATE:
         let at = new Date(datum)
         if (at.toString() === "Invalid Date") {
           return false
         }
-
-        if (this.filter[key].from.toString() !== "Invalid Date") {
-          if (this.filter[key].from > at) {
-            return false
-          }
+        if (this.filter[key].from.toString() !== "Invalid Date" && this.filter[key].from > at) {
+          return false
         }
-
-        if (this.filter[key].to.toString() !== "Invalid Date") {
-          if (this.filter[key].to < at) {
-            return false
-          }
+        if (this.filter[key].to.toString() !== "Invalid Date" && this.filter[key].to < at) {
+          return false
         }
-
         return true
 
       default:

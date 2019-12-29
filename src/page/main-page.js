@@ -5,11 +5,14 @@ import PropTypes from "prop-types"
 import axios from "axios"
 // For Table Test - End
 
-import FileUploaderModal from "../component/file-uploader-modal.js"
-import Navigator from "../component/navigator.js"
-import Table from "../component/table.js"
+import FileUploaderButton from "../component/file-uploader-button.js"
+import FiltableTable from "../component/filtable-table.js"
+import NavigatorBar from "../component/navigator-bar.js"
+import NavigatorItem from "../component/navigator-item.js"
 
-export default class MainPage extends React.Component {
+import FileFrom from "../component/file-form.js"
+
+export default class MainPage extends React.PureComponent {
 
   constructor(props) {
     super(props)
@@ -50,21 +53,29 @@ export default class MainPage extends React.Component {
   render() {
     return (
       <div>
-        <Navigator title={ this.props.project } items={ () => this.navigatorItems() } />
+        <NavigatorBar
+          title={ this.props.project }
+          items={ [
+            <NavigatorItem
+              key="register"
+              label="Register User"
+              page="/auth/form/register"
+              disabled={ this.props.user !== "root" }
+            />,
+            <NavigatorItem
+              key="logout"
+              label="Logout"
+              page="/auth/form/logout"
+            />
+          ] }
+        />
         <div className="text-center">
           <p>Hello { this.props.user }! This is the main page.</p>
-          <FileUploaderModal path="/data" />
-          <Table inputData={ this.data } />
+          <FileUploaderButton path="/data" />
+          <FiltableTable source={ this.data } />
         </div>
       </div>
     )
-  }
-
-  navigatorItems() {
-    var menu = []
-    menu.push(<button key="register" type="button" className="dropdown-item" disabled={ this.props.user !== "root" } onClick={ () => location.href = "/auth/form/register" }>Register User</button>)
-    menu.push(<button key="logout" type="button" className="dropdown-item" onClick={ () => location.href = "/auth/form/logout" }>Logout</button>)
-    return menu
   }
 
 }
