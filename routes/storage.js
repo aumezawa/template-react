@@ -38,66 +38,48 @@ router.get("*", Auth.isAuthenticated, (req, res, next) => {
     return next()
   }
 
-  var reqPath = path.join(dirPath, req.path)
+  const reqPath = path.join(dirPath, req.path)
   switch (req.query.cmd) {
     case "fstat":
       try {
-        var stats = fs.statSync(reqPath)
-        if (!stats.isFile()) {
+        let fstat = fs.statSync(reqPath)
+        if (!fstat.isFile()) {
           throw new FileError('no file exists')
         }
         return res.json({
-          success   : true,
-          fileName  : path.basename(req.path),
-          lastUpdate: stats.mtime
+          success : true,
+          name    : path.basename(reqPath),
+          update  : fstat.mtime
         })
       } catch {
         return res.json({
-          success: false
+          success : false
         })
       }
       break
 
-    case "lsdir":
+    case "ls":
       try {
-        var stats = fs.statSync(reqPath)
-        if (!stats.isDirectory()) {
-          throw new FileError('no directory exists')
-        }
-        var fileList = []
-        var dirList = []
-        var tmpList = [reqPath]
-        while (tmpList.length > 0) {
-          let node = tmpList.pop()
-          if (fs.statSync(node).isFile()) {
-            fileList.push(node)
-          } else if (fs.statSync(node).isDirectory()) {
-            if (node !== reqPath) {
-              dirList.push(node)
-            }
-            fs.readdirSync(node).forEach(name => {
-              tmpList.push(path.join(node, name))
+        const ls = node => {
+          if (fs.statSync(node).isDirectory()) {
+            return ({
+              name: path.basename(node),
+              file: false,
+              children: fs.readdirSync(node).map(name => {
+                return ls(path.join(node, name))
+              })
+            })
+          } else {
+            return ({
+              name: path.basename(node),
+              file: true
             })
           }
         }
+
         return res.json({
           success : true,
-          dirName : req.path,
-          fileList:
-            fileList.map(file => {
-              return file.replace(dirPath, "").replace(/\\/g, "/")
-            }),
-          dirList :
-            dirList.map(dir => {
-              return dir.replace(dirPath, "").replace(/\\/g, "/")
-            }),
-          lsdir   :
-            fs.readdirSync(reqPath).map(name => {
-              return ({
-                name: name,
-                file: fs.statSync(path.join(reqPath, name)).isFile()
-              })
-            })
+          ls      : ls(reqPath)
         })
       } catch {
         return res.json({
@@ -121,18 +103,17 @@ router.get("*", Auth.isAuthenticated, (req, res, next) => {
 
     case "rm":
       try {
-        var dirList = []
-        var tmpList = [reqPath]
-        while (tmpList.length > 0) {
-          let node = tmpList.pop()
-          if (fs.statSync(node).isFile()) {
+        const rm = node => {
+          if (fs.statSync(node).isDirectory()) {
+            fs.readdirSync(node).forEach(name => {
+              rm(path.join(node, name))
+            })
+          } else {
             fs.unlinkSync(node)
-          } else if (fs.statSync(node).isDirectory()) {
-            dirList.unshift(node)
-            fs.readdirSync(node).forEach(name => tmpList.push(path.join(node, name)))
           }
         }
-        dirList.forEach(dir => fs.rmdirSync(dir))
+
+        rm(reqPath)
         return res.json({
           success: true
         })

@@ -10,13 +10,19 @@ import FiltableTable from "../component/filtable-table.js"
 import NavigatorBar from "../component/navigator-bar.js"
 import NavigatorItem from "../component/navigator-item.js"
 
-import FileFrom from "../component/file-form.js"
+import TreeNode from "../component/tree-node.js"
 
 export default class MainPage extends React.PureComponent {
 
   constructor(props) {
     super(props)
+    this.state = {
+      // For Test - Start
+      toggle: false
+      // For Test - End
+    }
     this.data = {}
+    this.source = undefined
   }
 
   static get propTypes() {
@@ -33,9 +39,10 @@ export default class MainPage extends React.PureComponent {
     })
   }
 
-  // For Table Test - Start
+  // For Test - Start
   componentDidMount() {
     this.getFile()
+    this.ls()
   }
 
   getFile() {
@@ -43,12 +50,23 @@ export default class MainPage extends React.PureComponent {
     axios.get(uri)
       .then((res) => {
         this.data = res.data
-        this.setState({})
+        this.setState({toggle: !this.state.toggle})
       })
       .catch((err) => {
       })
   }
-  // For Table Test - End
+
+  ls() {
+    const uri = location.protocol + "//" + location.host + "/data?cmd=ls"
+    axios.get(uri)
+      .then((res) => {
+        this.source = res.data.ls
+        this.setState({toggle: !this.state.toggle})
+      })
+      .catch((err) => {
+      })
+  }
+  // For Test - End
 
   render() {
     return (
@@ -71,8 +89,9 @@ export default class MainPage extends React.PureComponent {
         />
         <div className="text-center">
           <p>Hello { this.props.user }! This is the main page.</p>
-          <FileUploaderButton path="/data" />
-          <FiltableTable source={ this.data } />
+          { true && <TreeNode source={ this.source } isName={ dict => dict.name } isLeaf={ dict => dict.file } isChild={ dict => dict.children } onClick={ v => console.log(v) } /> }
+          { true && <FileUploaderButton path="/data" /> }
+          { true && <FiltableTable source={ this.data } /> }
         </div>
       </div>
     )
