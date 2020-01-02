@@ -5,12 +5,11 @@ import PropTypes from "prop-types"
 import axios from "axios"
 // For Table Test - End
 
+import FileExplorerBox from "../component/file-explorer-box.js"
 import FileUploaderButton from "../component/file-uploader-button.js"
 import FiltableTable from "../component/filtable-table.js"
 import NavigatorBar from "../component/navigator-bar.js"
 import NavigatorItem from "../component/navigator-item.js"
-
-import TreeNode from "../component/tree-node.js"
 
 export default class MainPage extends React.PureComponent {
 
@@ -42,7 +41,6 @@ export default class MainPage extends React.PureComponent {
   // For Test - Start
   componentDidMount() {
     this.getFile()
-    this.ls()
   }
 
   getFile() {
@@ -50,17 +48,6 @@ export default class MainPage extends React.PureComponent {
     axios.get(uri)
       .then((res) => {
         this.data = res.data
-        this.setState({toggle: !this.state.toggle})
-      })
-      .catch((err) => {
-      })
-  }
-
-  ls() {
-    const uri = location.protocol + "//" + location.host + "/data?cmd=ls"
-    axios.get(uri)
-      .then((res) => {
-        this.source = res.data.ls
         this.setState({toggle: !this.state.toggle})
       })
       .catch((err) => {
@@ -87,11 +74,11 @@ export default class MainPage extends React.PureComponent {
             />
           ] }
         />
-        <div className="text-center">
-          <p>Hello { this.props.user }! This is the main page.</p>
-          { true && <TreeNode source={ this.source } isName={ dict => dict.name } isLeaf={ dict => dict.file } isChild={ dict => dict.children } onClick={ v => console.log(v) } /> }
-          { true && <FileUploaderButton path="/data" /> }
-          { true && <FiltableTable source={ this.data } /> }
+        <div>
+          <p className="text-center">Hello { this.props.user }! This is the main page.</p>
+          { true && <FileExplorerBox path="/data" onView={ file => console.log(file) } /> }
+          { false && <FileUploaderButton path="/data" /> }
+          { false && <FiltableTable source={ this.data } /> }
         </div>
       </div>
     )

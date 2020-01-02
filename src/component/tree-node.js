@@ -4,6 +4,8 @@ import ClassNames from "classnames"
 
 import uniqueId from "../lib/uniqueId.js"
 
+import EmbeddedButton from "./embedded-button.js"
+
 export default class TreeNode extends React.PureComponent {
 
   constructor(props) {
@@ -15,6 +17,7 @@ export default class TreeNode extends React.PureComponent {
       node    : "node-" + uniqueId(),
       collapse: "collapse-" + uniqueId()
     }
+    this.data = {}
   }
 
   static get propTypes() {
@@ -23,9 +26,10 @@ export default class TreeNode extends React.PureComponent {
       isName  : PropTypes.func.isRequired,
       isLeaf  : PropTypes.func.isRequired,
       isChild : PropTypes.func.isRequired,
+      labels  : PropTypes.array,
+      onClick : PropTypes.func,
       path    : PropTypes.string,
-      indent  : PropTypes.number,
-      onClick : PropTypes.func
+      indent  : PropTypes.number
     })
   }
 
@@ -35,9 +39,10 @@ export default class TreeNode extends React.PureComponent {
       isName  : undefined,
       isLeaf  : undefined,
       isChild : undefined,
+      labels  : [],
+      onClick : undefined,
       path    : "",
-      indent  : 0,
-      onClick : undefined
+      indent  : 0
     })
   }
 
@@ -65,29 +70,42 @@ export default class TreeNode extends React.PureComponent {
   renderChildren() {
     try {
       return this.props.isChild(this.props.source).map(child => {
+        let dirpath = this.props.path + "/" + this.props.isName(this.props.source)
+        let filepath = dirpath + "/" + this.props.isName(child)
         if (this.props.isLeaf(child)) {
           return (
-            <button
-              type="button"
+            <li
               className="list-group-item list-group-item-action list-group-item-light rounded-0 text-left text-monospace"
-              key={ this.id.node + this.props.path + "/" + this.props.isName(child) }
-              title={ this.props.path + "/" + this.props.isName(this.props.source) + "/" + this.props.isName(child) }
-              onClick={ e => this.handleClickLeaf(e) }
+              key={ this.id.node + filepath }
             >
               { "-".repeat(this.props.indent + 1) } { this.props.isName(child) }
-            </button>
+              {
+                this.props.labels.map((label, index) => {
+                  return (
+                    <EmbeddedButton
+                      key={ this.id.node + filepath + index }
+                      label={ label }
+                      title={ filepath + ":" + index}
+                      on={ true }
+                      onClick={ e => this.handleClickLeaf(e) }
+                    />
+                  )
+                })
+              }
+            </li>
           )
         } else {
           return (
             <TreeNode
-              key={ this.id.node + this.props.path + "/" + this.props.isName(child) }
+              key={ this.id.node + filepath }
               source={ child }
               isName={ this.props.isName }
               isLeaf={ this.props.isLeaf }
               isChild={ this.props.isChild }
-              path={ this.props.path + "/" + this.props.isName(this.props.source) }
-              indent={ this.props.indent + 1 }
+              labels={ this.props.labels }
               onClick={ this.props.onClick }
+              path={ dirpath }
+              indent={ this.props.indent + 1 }
             />
           )
         }
@@ -110,8 +128,12 @@ export default class TreeNode extends React.PureComponent {
   }
 
   handleClickLeaf(event) {
+    let data = event.target.title.split(":")
+    this.data.file = data[0]
+    this.data.func = (data.length > 1) ? Number(data[1]) : 0
     if (this.props.onClick) {
-      this.props.onClick(event.target.title)
+      this.props.onClick(this.data)
     }
   }
+
 }

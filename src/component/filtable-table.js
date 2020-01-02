@@ -5,6 +5,7 @@ import ClassNames from "classnames"
 import uniqueId from "../lib/uniqueId.js"
 
 import ComplexFilterForm from "./complex-filter-form.js"
+import EmbeddedButton from "./embedded-button.js"
 import Modal from "./modal.js"
 
 export default class Table extends React.PureComponent {
@@ -87,16 +88,15 @@ export default class Table extends React.PureComponent {
           return (
             <th scope="col" className="table-dark text-monospace" key={ key }>
               { key }{ "  " }
-              <span
-                className={ ClassNames({ "badge": true, "badge-light": !(key in this.filter), "badge-success": (key in this.filter) }) }
+              <EmbeddedButton
                 key={ key }
+                label="Filter"
                 title={ key }
-                data-toggle="modal"
-                data-target={ "#" + this.id.modal }
+                on={ key in this.filter }
+                toggle="modal"
+                target={ "#" + this.id.modal }
                 onClick={ e => this.handleClickFilter(e) }
-              >
-                Filter
-              </span>
+              />
             </th>
           )
         }))
