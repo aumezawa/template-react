@@ -34,7 +34,7 @@ export default class FileExplorerBox extends React.PureComponent {
 
   static get CONST() {
     return ({
-      LABELS: ["view", "download"]
+      LABELS: ["view", "DL"]
     })
   }
 
@@ -42,10 +42,12 @@ export default class FileExplorerBox extends React.PureComponent {
     const uri = location.protocol + "//" + location.host + this.props.path + "?cmd=ls"
     axios.get(uri)
     .then(res => {
-      this.data.ls = res.data.ls
-      this.setState({
-        done: true
-      })
+      if (res.data.success) {
+        this.data.ls = res.data.ls
+        this.setState({
+          done: true
+        })
+      }
     })
     .catch(err => {
       this.data.ls = undefined
@@ -73,7 +75,7 @@ export default class FileExplorerBox extends React.PureComponent {
         this.handleClickView(data)
         break
 
-      case "download":
+      case "DL":
         this.handleClickDownload(data)
         break
 
@@ -83,10 +85,21 @@ export default class FileExplorerBox extends React.PureComponent {
   }
 
   handleClickView(data) {
-    this.data.file = data.file
-    if (this.props.onView) {
-      this.props.onView(this.data)
-    }
+    const uri = location.protocol + "//" + location.host + path.join(path.dirname(this.props.path), data.file) + "?cmd=jat"
+
+    this.data.file = path.basename(data.file)
+    axios.get(uri)
+    .then(res => {
+      if (res.data.success) {
+        this.data.table = res.data.table
+        if (this.props.onView) {
+          this.props.onView(this.data)
+        }
+      }
+    })
+    .catch(err => {
+      this.data.table = undefined
+    })
   }
 
   handleClickDownload(data) {

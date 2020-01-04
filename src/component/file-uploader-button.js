@@ -1,5 +1,6 @@
 import React from "react"
 import PropTypes from "prop-types"
+import ClassNames from "classnames"
 
 import axios from "axios"
 import path from "path"
@@ -29,6 +30,8 @@ export default class FileUploaderButton extends React.PureComponent {
     return ({
       path      : PropTypes.string.isRequired,
       title     : PropTypes.string,
+      center    : PropTypes.bool,
+      margin    : PropTypes.bool,
       preFunc   : PropTypes.func,
       postFunc  : PropTypes.func,
       interval  : PropTypes.number
@@ -39,6 +42,8 @@ export default class FileUploaderButton extends React.PureComponent {
     return ({
       path      : undefined,
       title     : "File Uploader",
+      center    : false,
+      margin    : false,
       preFunc   : undefined,
       postFunc  : undefined,
       interval  : 3
@@ -51,7 +56,7 @@ export default class FileUploaderButton extends React.PureComponent {
 
   render() {
     return (
-      <div>
+      <div className={ ClassNames({ "text-center": this.props.center, "my-3": this.props.margin }) }>
         <button
           type="button"
           className="btn btn-primary"
@@ -65,7 +70,7 @@ export default class FileUploaderButton extends React.PureComponent {
           id={ this.id.modal }
           title={ this.props.title }
           message={ this.data.message }
-          body={ () =>
+          body={
             <FileUploader
               path={ this.props.path }
               onDone={ (success, data) => this.onDone(success, data) }

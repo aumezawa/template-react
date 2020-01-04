@@ -75,6 +75,7 @@ export default class TextFilterForm extends React.PureComponent {
     this.setState({
       valid: newValid
     })
+    return newValid
   }
 
   isValid(valid = true, exceptKeys = []) {
@@ -114,7 +115,7 @@ export default class TextFilterForm extends React.PureComponent {
   }
 
   reset() {
-    this.init(Object.keys(this.children).reduce((acc, key) => {
+    return this.init(Object.keys(this.children).reduce((acc, key) => {
       return this.children[key].reset() && acc
     }, true))
   }

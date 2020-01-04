@@ -51,7 +51,7 @@ export default class TreeNode extends React.PureComponent {
       <ul className="list-group">
         <button
           type="button"
-          className="list-group-item list-group-item-action list-group-item-info rounded-0 text-left text-monospace"
+          className="list-group-item list-group-item-action list-group-item-info rounded-0 text-left text-monospace py-2"
           data-toggle="collapse"
           data-target={ "#" + this.id.collapse }
           aria-expanded="false"
@@ -75,7 +75,7 @@ export default class TreeNode extends React.PureComponent {
         if (this.props.isLeaf(child)) {
           return (
             <li
-              className="list-group-item list-group-item-action list-group-item-light rounded-0 text-left text-monospace"
+              className="list-group-item list-group-item-action list-group-item-light rounded-0 text-left text-monospace py-2"
               key={ this.id.node + filepath }
             >
               { "-".repeat(this.props.indent + 1) } { this.props.isName(child) }
@@ -113,7 +113,7 @@ export default class TreeNode extends React.PureComponent {
     } catch {
       return (
         <li
-          className="list-group-item list-group-item-action list-group-item-light rounded-0 text-left text-monospace"
+          className="list-group-item list-group-item-action list-group-item-light rounded-0 text-left text-monospace py-2"
         >
           Invalid input data...
         </li>

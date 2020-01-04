@@ -18,7 +18,7 @@ export default class Modal extends React.PureComponent {
       id        : PropTypes.string.isRequired,
       title     : PropTypes.string,
       message   : PropTypes.string,
-      body      : PropTypes.func,
+      body      : PropTypes.element,
       closeFunc : PropTypes.func
     })
   }
@@ -28,7 +28,7 @@ export default class Modal extends React.PureComponent {
       id        : undefined,
       title     : "Title",
       message   : "Hello.",
-      body      : () => this.defaultBody(),
+      body      : <div>Nothing to do...</div>,
       closeFunc : undefined
     })
   }
@@ -47,7 +47,7 @@ export default class Modal extends React.PureComponent {
             <div className="modal-body">
               <div className="text-left">{ this.props.message }</div>
               <br />
-              { this.props.body() }
+              { this.props.body }
             </div>
             <div className="modal-footer">
               <button type="button" className="btn btn-secondary" data-dismiss="modal" onClick={ () => this.hidden() }>Close</button>
@@ -62,12 +62,6 @@ export default class Modal extends React.PureComponent {
     if (this.props.closeFunc) {
       this.props.closeFunc()
     }
-  }
-
-  static defaultBody() {
-    return(
-      <div>Nothing to do...</div>
-    )
   }
 
 }

@@ -64,6 +64,7 @@ export default class DateFilterForm extends React.PureComponent {
     this.setState({
       valid: newValid
     })
+    return newValid
   }
 
   isValid(valid = true, exceptKeys = []) {
@@ -103,7 +104,7 @@ export default class DateFilterForm extends React.PureComponent {
   }
 
   reset() {
-    this.init(Object.keys(this.children).reduce((acc, key) => {
+    return this.init(Object.keys(this.children).reduce((acc, key) => {
       return this.children[key].reset() && acc
     }, true))
   }

@@ -18,12 +18,18 @@ export default class Table extends React.PureComponent {
     this.id = {
       modal: "modal-" + uniqueId()
     }
+    this.form = {}
     this.filter = {}
+    this.filterLabel = {
+      prev    : undefined,
+      current : undefined
+    }
   }
 
   static get propTypes() {
     return ({
       source: PropTypes.object.isRequired,
+      title : PropTypes.string,
       small : PropTypes.bool,
       height: PropTypes.string,
     })
@@ -32,8 +38,9 @@ export default class Table extends React.PureComponent {
   static get defaultProps() {
     return ({
       source: undefined,
+      title : "",
       small : false,
-      height: "80%",
+      height: "85%",
     })
   }
 
@@ -42,10 +49,11 @@ export default class Table extends React.PureComponent {
       <div>
         <Modal
           id={ this.id.modal }
-          title="Filter"
+          title={ "Filter - " + this.filterLabel.current }
           message="Input condition."
-          body={ () =>
+          body={
             <ComplexFilterForm
+              ref={ ref => this.form.filter = ref }
               onSubmit={ data => this.handleSubmitFilter(data) }
               onClear={ () => this.handleClearFilter() }
             />
@@ -64,14 +72,11 @@ export default class Table extends React.PureComponent {
   }
 
   renderTitle() {
-    let title
     try {
-      const format = this.props.source.format
-      title = this.props.source.format.title
+      return <h5>{ this.props.title + " - " + this.props.source.format.title }</h5>
     } catch {
-      title = "Untitled"
+      return <h5>Untitled</h5>
     }
-    return <h5>{ title }</h5>
   }
 
   renderHeader() {
@@ -184,18 +189,26 @@ export default class Table extends React.PureComponent {
   }
 
   handleClickFilter(event) {
-    this.filterLabel = event.target.title
+    this.filterLabel.prev = this.filterLabel.current
+    this.filterLabel.current = event.target.title
+    if (this.filterLabel.current !== this.filterLabel.prev) {
+      this.form.filter.reset()
+      this.setState({
+        toggle: !this.state.toggle
+      })
+    }
   }
 
   handleSubmitFilter(data) {
-    this.filter[this.filterLabel] = Object.assign({}, data)
+    this.filter[this.filterLabel.current] = Object.assign({}, data)
     this.setState({
       toggle: !this.state.toggle
     })
   }
 
   handleClearFilter(data) {
-    delete this.filter[this.filterLabel]
+    delete this.filter[this.filterLabel.current]
+    this.form.filter.reset()
     this.setState({
       toggle: !this.state.toggle
     })

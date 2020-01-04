@@ -124,6 +124,32 @@ router.get("*", Auth.isAuthenticated, (req, res, next) => {
       }
       break
 
+    case "jat":
+      try {
+        return res.json({
+          success : true,
+          table   : {
+            "format": {
+              "title": "",
+              "keys": ["Content"],
+              "hasHeader": true,
+              "hasIndex": true,
+              "contentKey": "Content"
+            },
+            "data": fs.readFileSync(reqPath, "utf8").split(/\r\n|\n|\r/).map(line => {
+              return {
+                Content: line
+              }
+            })
+          }
+        })
+      } catch {
+        return res.json({
+          success : false
+        })
+      }
+      break
+
     default:
       return res.json({
         success: false

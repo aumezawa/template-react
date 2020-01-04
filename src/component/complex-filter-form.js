@@ -115,6 +115,7 @@ export default class ComplexFilterForm extends React.PureComponent {
       valid : newValid,
       type  : this.data.type
     })
+    return newValid
   }
 
   isValid(valid = true, exceptKeys = []) {
@@ -187,7 +188,7 @@ export default class ComplexFilterForm extends React.PureComponent {
   }
 
   reset() {
-    this.init(Object.keys(this.children).reduce((acc, key) => {
+    return this.init(Object.keys(this.children).reduce((acc, key) => {
       return this.children[key].reset() && acc
     }, true))
   }

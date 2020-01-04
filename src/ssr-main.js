@@ -46,9 +46,7 @@ export default class SsrMain extends React.Component {
         </head>
 
         <body>
-          <div className="container">
-            <div id="csr-main" project={ this.props.project } page={ this.props.page } user={ this.props.user } />
-          </div>
+          <div id="csr-main" project={ this.props.project } page={ this.props.page } user={ this.props.user } />
           <script src={ this.props.script }></script>
         </body>
       </html>
