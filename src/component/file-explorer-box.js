@@ -12,15 +12,14 @@ export default class FileExplorerBox extends React.PureComponent {
   constructor(props) {
     super(props)
     this.state = {
-      done: false
+      toggle: false
     }
-    this.id = {}
     this.data = {}
   }
 
   static get propTypes() {
     return ({
-      path  : PropTypes.string.isRequired,
+      path  : PropTypes.string,
       onView: PropTypes.func
     })
   }
@@ -39,19 +38,9 @@ export default class FileExplorerBox extends React.PureComponent {
   }
 
   componentDidMount() {
-    const uri = location.protocol + "//" + location.host + this.props.path + "?cmd=ls"
-    axios.get(uri)
-    .then(res => {
-      if (res.data.success) {
-        this.data.ls = res.data.ls
-        this.setState({
-          done: true
-        })
-      }
-    })
-    .catch(err => {
-      this.data.ls = undefined
-    })
+    if (this.props.path) {
+      this.load()
+    }
   }
 
   render() {
@@ -67,6 +56,24 @@ export default class FileExplorerBox extends React.PureComponent {
         />
       </div>
     )
+  }
+
+  load() {
+    const uri = location.protocol + "//" + location.host + this.props.path + "?cmd=ls"
+    axios.get(uri)
+    .then(res => {
+      if (!res.data.success) {
+        throw new Error("no directory found")
+      }
+      this.data.ls = res.data.ls
+      this.setState({
+        toggle: !this.state.toggle
+      })
+    })
+    .catch(err => {
+      this.data.ls = undefined
+      alert("Could not view the directory...")
+    })
   }
 
   handleClick(data) {
@@ -90,15 +97,17 @@ export default class FileExplorerBox extends React.PureComponent {
     this.data.file = path.basename(data.file)
     axios.get(uri)
     .then(res => {
-      if (res.data.success) {
-        this.data.table = res.data.table
-        if (this.props.onView) {
-          this.props.onView(this.data)
-        }
+      if (!res.data.success) {
+        throw new Error("no file found")
+      }
+      this.data.table = res.data.table
+      if (this.props.onView) {
+        this.props.onView(this.data)
       }
     })
     .catch(err => {
       this.data.table = undefined
+      alert("Could not view the file...")
     })
   }
 

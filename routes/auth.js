@@ -7,12 +7,7 @@ import React from "react"
 import ReactDOMServer from "react-dom/server"
 import SsrMain from "../src/ssr-main.js"
 
-var authEnabled = true
-process.argv.forEach(arg => {
-  if (arg === "--noAuth") {
-    authEnabled = false
-  }
-})
+const authEnabled = !process.argv.includes("--noAuth")
 
 const uriPath = "/auth"
 const dirPath = path.join(__dirname, "..", "auth")
@@ -53,19 +48,14 @@ router.post("/form/login", (req, res, next) => {
       return next(err)
     }
     if (!user) {
-      return res.json({
-        success: false
-      })
+      return res.json({ success: false })
     }
 
     req.login(user, err => {
       if (err) {
         return next(err)
       }
-      return res.json({
-        success: true,
-        path: "/"
-      })
+      return res.json({ success: true, path: "/" })
     })
   })(req, res, next)
 })
@@ -84,31 +74,20 @@ router.get("/form/register", isAuthenticated, isRoot, (req, res, next) => {
 })
 
 router.post("/form/register", isAuthenticated, isRoot, (req, res, next) => {
-  process.nextTick(() => {
-    fs.readFile(localPath, (err, data) => {
-      if (err) {
-        return res.json({
-          success: false
-        })
-      }
-      var userList = JSON.parse(data)
-      if (req.body.username in userList) {
-        return res.json({
-          success: false
-        })
-      }
-      userList[req.body.username] = req.body.password
-      fs.writeFile(localPath, JSON.stringify(userList), (err) => {
-        if (err) {
-          return res.json({
-            success: false
-          })
-        }
-        return res.json({
-          success: true
-        })
-      })
-    })
+  fs.promises.readFile(localPath)
+  .then(data => {
+    let userList = JSON.parse(data)
+    if (req.body.username in userList) {
+      throw new Error("user has already registerd")
+    }
+    userList[req.body.username] = req.body.password
+    return fs.promises.writeFile(localPath, JSON.stringify(userList))
+  })
+  .then(() => {
+    return res.json({ success: true })
+  })
+  .catch(err => {
+    return res.json({ success: false })
   })
 })
 

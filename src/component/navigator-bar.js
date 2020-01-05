@@ -38,7 +38,7 @@ export default class NavigatorBar extends React.PureComponent {
             Menu
           </button>
           <div
-            className="dropdown-menu"
+            className="dropdown-menu dropdown-menu-right"
             aria-labelledby="dropdownMenuButton"
             style={ { "zIndex": 9999 } }
           >

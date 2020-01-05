@@ -12,20 +12,16 @@ import indexRouter from "./routes/index.js"
 import storageRouter from "./routes/storage.js"
 import authRouter from "./routes/auth.js"
 
-const app = express()
+import project from "./package.json"
 
-/*
-app.set("views", path.join(__dirname, "views"))
-app.set("view engine", "jsx")
-app.engine("jsx", require("express-react-views").createEngine())
-*/
+const app = express()
 
 app.use(logger("dev"));
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(cookieParser())
 
-app.use(session({ secret: "react-aume" }))
+app.use(session({ secret: project.name }))
 app.use(passport.initialize())
 app.use(passport.session())
 
@@ -33,16 +29,15 @@ passport.use(new passportLocal.Strategy({
     userNameField: "username",
     passwordField: "password"
   }, (username, password, done) => {
-    process.nextTick(() => {
-      fs.readFile(authRouter.localPath, (err, data) => {
-        if (err) {
-          return done(null, false)
-        }
-        if (password !== JSON.parse(data)[username]) {
-          return done(null, false)
-        }
-        return done(null, username)
-      })
+    fs.promises.readFile(authRouter.localPath)
+    .then(data => {
+      if (password !== JSON.parse(data)[username]) {
+        throw new Error("no user found")
+      }
+      return done(null, username)
+    })
+    .catch(err => {
+      return done(null, false)
     })
   })
 )
@@ -57,13 +52,13 @@ app.use(storageRouter.uriPath, express.static(storageRouter.dirPath))
 app.use(authRouter.uriPath, authRouter)
 
 /*
-app.use(function(req, res, next) {
+app.use((req, res, next) => {
   next(createError(404))
 })
 */
 
 /*
-app.use(function(err, req, res, next) {
+app.use((err, req, res, next) => {
   // set locals, only providing error in development
   res.locals.message = err.message
   res.locals.error = req.app.get("env") === "development" ? err : {}

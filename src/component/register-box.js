@@ -15,18 +15,16 @@ export default class RegisterBox extends React.PureComponent {
       done    : false,
       success : false,
     }
-    this.message = this.props.description
+    this.message = "Register a new user."
   }
 
   static get propTypes() {
     return ({
-      description : PropTypes.string
     })
   }
 
   static get defaultProps() {
     return ({
-      description : "Register a new user."
     })
   }
 
@@ -56,21 +54,23 @@ export default class RegisterBox extends React.PureComponent {
     })
 
     axios.post(uri, params)
-    .then((res) => {
-      if (res.data.success) {
-        this.message = `Succeeded to register as "${ data.username }".`
-        this.setState({
-          done    : true,
-          success : true
-        })
-        this.form.reset()
-      } else {
-        this.message = `Failed to register as "${ data.username }"... It might be already registered.`
-        this.setState({
-          done    : true,
-          success : false
-        })
+    .then(res => {
+      if (!res.data.success) {
+        throw new Error("registration failed")
       }
+      this.message = `Succeeded to register as "${ data.username }".`
+      this.setState({
+        done    : true,
+        success : true
+      })
+      this.form.reset()
+    })
+    .catch(err => {
+      this.message = `Failed to register as "${ data.username }"... It might be already registered.`
+      this.setState({
+        done    : true,
+        success : false
+      })
     })
   }
 

@@ -28,7 +28,7 @@ export default class RegisterPage extends React.PureComponent {
 
   render() {
     return (
-      <div>
+      <div className="container-fluid">
         <NavigatorBar
           title={ this.props.project }
           items={ [

@@ -17,7 +17,6 @@ export default class MainPage extends React.PureComponent {
       toggle: false
     }
     this.data = {}
-    this.source = undefined
   }
 
   static get propTypes() {
@@ -62,7 +61,7 @@ export default class MainPage extends React.PureComponent {
           }
           left={
             <TabFrame
-              labels={ ["ID", "Explorer", "Upload"] }
+              labels={ ["Case", "Explorer", "Upload"] }
               items={ [
                 <div></div>,
                 <FileExplorerBox path="/data" onView={ data => this.handleView(data) } />,

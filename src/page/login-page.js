@@ -28,7 +28,7 @@ export default class LoginPage extends React.PureComponent {
 
   render() {
     return (
-      <div>
+      <div className="container-fluid">
         <NavigatorBar title={ this.props.project } />
         <LoginBox />
       </div>

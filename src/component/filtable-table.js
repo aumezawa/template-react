@@ -8,7 +8,7 @@ import ComplexFilterForm from "./complex-filter-form.js"
 import EmbeddedButton from "./embedded-button.js"
 import Modal from "./modal.js"
 
-export default class Table extends React.PureComponent {
+export default class FiltableTable extends React.PureComponent {
 
   constructor(props) {
     super(props)
@@ -28,7 +28,7 @@ export default class Table extends React.PureComponent {
 
   static get propTypes() {
     return ({
-      source: PropTypes.object.isRequired,
+      source: PropTypes.object,
       title : PropTypes.string,
       small : PropTypes.bool,
       height: PropTypes.string,
@@ -40,7 +40,7 @@ export default class Table extends React.PureComponent {
       source: undefined,
       title : "",
       small : false,
-      height: "85%",
+      height: "95%",
     })
   }
 
@@ -80,11 +80,9 @@ export default class Table extends React.PureComponent {
   }
 
   renderHeader() {
-    let header
-
     try {
       const format = this.props.source.format
-      header = []
+      let header = []
       if (format.hasHeader) {
         if (format.hasIndex) {
           header = [<th scope="col" className="table-dark text-monospace" key="idx">#</th>]
@@ -106,20 +104,17 @@ export default class Table extends React.PureComponent {
           )
         }))
       }
+      return <tr>{ header }</tr>
     } catch {
-      header = <th scope="col" className="table-dark text-monospace">Invalid input data...</th>
+      return <tr><th scope="col" className="table-dark text-monospace">Invalid input data...</th></tr>
     }
-
-    return <tr>{ header }</tr>
   }
 
   renderBody() {
-    let body
-
     try {
       const format = this.props.source.format
       const data = this.props.source.data
-      body = data.map((datum, index) => {
+      return data.map((datum, index) => {
         let line = []
         let display = format.keys.reduce((acc, key) => {
           return acc && this.isDisplay(key, datum[key])
@@ -141,10 +136,8 @@ export default class Table extends React.PureComponent {
         return <tr className={ ClassNames({ "d-none": !display }) } key={ index }>{ line }</tr>
       })
     } catch {
-      body = []
+      return []
     }
-
-    return body
   }
 
   isDisplay(key, datum) {

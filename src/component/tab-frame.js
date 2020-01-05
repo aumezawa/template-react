@@ -4,10 +4,11 @@ import ClassNames from "classnames"
 
 import uniqueId from "../lib/uniqueId.js"
 
-export default class TabFrame extends React.Component {
+export default class TabFrame extends React.PureComponent {
 
   constructor(props) {
     super(props)
+    this.state = {}
     this.id = {
       tab: "tab-" + uniqueId(),
       item: "item-" + uniqueId()

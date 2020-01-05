@@ -16,20 +16,18 @@ export default class LoginBox extends React.PureComponent {
       done    : false,
       success : false,
     }
-    this.message = this.props.description
+    this.message = `Please input your "username" and "password" (between 4 - 16 characters with [0-9a-zA-Z])`
     this.redirectSec = (this.props.redirectSec > 0) ? this.props.redirectSec : 1
   }
 
   static get propTypes() {
     return ({
-      description : PropTypes.string,
       redirectSec : PropTypes.number
     })
   }
 
   static get defaultProps() {
     return ({
-      description : `Please input your "username" and "password" (between 4 - 16 characters with [0-9a-zA-Z])`,
       redirectSec : 3
     })
   }
@@ -68,21 +66,23 @@ export default class LoginBox extends React.PureComponent {
     })
 
     axios.post(uri, params)
-    .then((res) => {
-      if (res.data.success) {
-        this.message = `Succeeded to login as "${ data.username }". Will redirect automatically in ${ this.redirectSec } sec.`
-        this.setState({
-          done    : true,
-          success : true
-        })
-        setTimeout(() => location.pathname = res.data.path, this.redirectSec * 1000)
-      } else {
-        this.message = `Failed to login as "${ data.username }"...`
-        this.setState({
-          done    : true,
-          success : false
-        })
+    .then(res => {
+      if (!res.data.success) {
+        throw new Error("login failed")
       }
+      this.message = `Succeeded to login as "${ data.username }". Will redirect automatically in ${ this.redirectSec } sec.`
+      this.setState({
+        done    : true,
+        success : true
+      })
+      setTimeout(() => location.pathname = res.data.path, this.redirectSec * 1000)
+    })
+    .catch(err => {
+      this.message = `Failed to login as "${ data.username }"...`
+      this.setState({
+        done    : true,
+        success : false
+      })
     })
   }
 

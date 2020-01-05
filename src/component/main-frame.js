@@ -6,7 +6,6 @@ export default class TextForm extends React.PureComponent {
   constructor(props) {
     super(props)
     this.state = {}
-    this.data = {}
   }
 
   static get propTypes() {
@@ -35,7 +34,7 @@ export default class TextForm extends React.PureComponent {
           <div className="col-3 h-100 overflow-auto">
             { this.props.left }
           </div>
-          <div className="col-9">
+          <div className="col-9 h-100 overflow-auto">
             { this.props.main }
           </div>
         </div>

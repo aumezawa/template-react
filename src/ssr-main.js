@@ -3,10 +3,11 @@ import PropTypes from "prop-types"
 
 import project from "../package.json"
 
-export default class SsrMain extends React.Component {
+export default class SsrMain extends React.PureComponent {
 
   constructor(props) {
     super(props)
+    this.state = {}
   }
 
   static get propTypes() {

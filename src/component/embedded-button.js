@@ -6,6 +6,7 @@ export default class EmbeddedButton extends React.PureComponent {
 
   constructor(props) {
     super(props)
+    this.state = {}
   }
 
   static get propTypes() {
@@ -22,7 +23,7 @@ export default class EmbeddedButton extends React.PureComponent {
 
   static get defaultProps() {
     return ({
-      label   : "",
+      label   : "button",
       title   : "",
       on      : false,
       toggle  : "",
@@ -37,7 +38,7 @@ export default class EmbeddedButton extends React.PureComponent {
       <span>
         { " ".repeat(this.props.blank) }
         <span
-          className={ ClassNames({"badge": true, "badge-btn": true, "badge-success": this.props.on, "badge-light": !this.props.on }) }
+          className={ ClassNames({ "badge": true, "badge-btn": true, "badge-success": this.props.on, "badge-light": !this.props.on }) }
           title={ this.props.title }
           data-toggle={ this.props.toggle }
           data-target={ this.props.target }
