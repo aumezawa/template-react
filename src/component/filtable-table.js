@@ -7,22 +7,25 @@ import uniqueId from "../lib/uniqueId.js"
 import ComplexFilterForm from "./complex-filter-form.js"
 import EmbeddedButton from "./embedded-button.js"
 import Modal from "./modal.js"
+import Pagination from "../component/pagination.js"
 
 export default class FiltableTable extends React.PureComponent {
 
   constructor(props) {
     super(props)
     this.state = {
-      toggle: false
+      page: 1
     }
     this.id = {
       modal: "modal-" + uniqueId()
     }
     this.form = {}
-    this.filter = {}
-    this.filterLabel = {
-      prev    : undefined,
-      current : undefined
+    this.filter = {
+      conditions: {},
+      label: {
+        prev    : undefined,
+        current : undefined
+      }
     }
   }
 
@@ -30,8 +33,7 @@ export default class FiltableTable extends React.PureComponent {
     return ({
       source: PropTypes.object,
       title : PropTypes.string,
-      small : PropTypes.bool,
-      height: PropTypes.string,
+      rows  : PropTypes.number
     })
   }
 
@@ -39,8 +41,7 @@ export default class FiltableTable extends React.PureComponent {
     return ({
       source: undefined,
       title : "",
-      small : false,
-      height: "95%",
+      rows  : 5000
     })
   }
 
@@ -49,7 +50,7 @@ export default class FiltableTable extends React.PureComponent {
       <div>
         <Modal
           id={ this.id.modal }
-          title={ "Filter - " + this.filterLabel.current }
+          title={ "Filter - " + this.filter.label.current }
           message="Input condition."
           body={
             <ComplexFilterForm
@@ -59,13 +60,21 @@ export default class FiltableTable extends React.PureComponent {
             />
           }
         />
-        { this.renderTitle() }
-        <div className="table-responsive" style={ { height: this.props.height } }>
-          <table className={ ClassNames({ "table": true, "table-fixed": true, "table-hover": true, "table-sm": this.props.small }) }>
-            <thead>{ this.renderHeader() }</thead>
-            <tbody>{ this.renderBody() }</tbody>
-            <tfoot></tfoot>
-          </table>
+        <div className="d-flex flex-column h-100">
+          { this.renderTitle() }
+          <div className="table-responsive">
+            <table className="table table-hover table-fixed text-monospace">
+              <thead className="thead-dark">{ this.renderHeader() }</thead>
+              <tbody>{ this.renderBody() }</tbody>
+              <tfoot></tfoot>
+            </table>
+          </div>
+          <Pagination
+            className="mt-2"
+            current={ this.state.page }
+            last={ Math.floor(this.rows / this.props.rows) + 1 }
+            onChange={ page => this.handleChangePage(page) }
+          />
         </div>
       </div>
     )
@@ -85,20 +94,19 @@ export default class FiltableTable extends React.PureComponent {
       let header = []
       if (format.hasHeader) {
         if (format.hasIndex) {
-          header = [<th scope="col" className="table-dark text-monospace" key="idx">#</th>]
+          header = [<th scope="col" key="index">#</th>]
         }
         header = header.concat(format.keys.map(key => {
           return (
-            <th scope="col" className="table-dark text-monospace" key={ key }>
+            <th scope="col" key={ key }>
               { key }{ "  " }
               <EmbeddedButton
-                key={ key }
                 label="Filter"
                 title={ key }
-                on={ key in this.filter }
+                on={ key in this.filter.conditions }
                 toggle="modal"
                 target={ "#" + this.id.modal }
-                onClick={ e => this.handleClickFilter(e) }
+                onClick={ e => this.handleClickFilterButton(e) }
               />
             </th>
           )
@@ -106,34 +114,37 @@ export default class FiltableTable extends React.PureComponent {
       }
       return <tr>{ header }</tr>
     } catch {
-      return <tr><th scope="col" className="table-dark text-monospace">Invalid input data...</th></tr>
+      return <tr><th scope="col">Invalid input data...</th></tr>
     }
   }
 
   renderBody() {
     try {
+      this.rows = 0
       const format = this.props.source.format
       const data = this.props.source.data
       return data.map((datum, index) => {
-        let line = []
-        let display = format.keys.reduce((acc, key) => {
+        if (!format.keys.reduce((acc, key) => {
           return acc && this.isDisplay(key, datum[key])
-        }, true)
-        if (format.hasIndex) {
-          line = [<th scope="row" className="text-right text-monospace" key={ "idx" + index }>{ (index + 1) + ":" }</th>]
+        }, true)) { return }
+
+        this.rows++
+        if (this.rows <= (this.state.page - 1) * this.props.rows || this.rows > this.state.page * this.props.rows) {
+          return
         }
-        line = line.concat(format.keys.map(key => {
+
+        let row = []
+        if (format.hasIndex) {
+          row = [<th scope="row" className="text-right" key={ "index" + index }>{ (index + 1) + ":" }</th>]
+        }
+        row = row.concat(format.keys.map(key => {
           return (
-            <td
-              scope="row"
-              className={ ClassNames({ "text-monospace": true, "content": key === format.contentKey }) }
-              key={ key + index }
-            >
+            <td className={ ClassNames({ "content": key === format.contentKey }) } key={ key + index }>
               { datum[key] }
             </td>
           )
         }))
-        return <tr className={ ClassNames({ "d-none": !display }) } key={ index }>{ line }</tr>
+        return <tr key={ "row" + index }>{ row }</tr>
       })
     } catch {
       return []
@@ -141,23 +152,23 @@ export default class FiltableTable extends React.PureComponent {
   }
 
   isDisplay(key, datum) {
-    if (Object.keys(this.filter).length === 0) {
+    if (Object.keys(this.filter.conditions).length === 0) {
       return true
     }
 
-    if (!(key in this.filter)) {
+    if (!(key in this.filter.conditions)) {
       return true
     }
 
-    switch (this.filter[key].type) {
+    switch (this.filter.conditions[key].type) {
       case ComplexFilterForm.CONST.TYPE_TEXT:
-        switch (this.filter[key].mode) {
+        switch (this.filter.conditions[key].mode) {
           case ComplexFilterForm.CONST.MODE_INCLUDED:
-            return datum.includes(this.filter[key].condition) ? true : false
+            return datum.includes(this.filter.conditions[key].condition) ? true : false
           case ComplexFilterForm.CONST.MODE_NOT_INCLUDED:
-            return !datum.includes(this.filter[key].condition) ? true : false
+            return !datum.includes(this.filter.conditions[key].condition) ? true : false
           case ComplexFilterForm.CONST.MODE_REGEX:
-            let re = new RegExp(this.filter[key].condition)
+            let re = new RegExp(this.filter.conditions[key].condition)
             return (re.exec(datum) !== null) ? true : false
           default:
             return false
@@ -168,10 +179,10 @@ export default class FiltableTable extends React.PureComponent {
         if (at.toString() === "Invalid Date") {
           return false
         }
-        if (this.filter[key].from.toString() !== "Invalid Date" && this.filter[key].from > at) {
+        if (this.filter.conditions[key].from.toString() !== "Invalid Date" && this.filter.conditions[key].from > at) {
           return false
         }
-        if (this.filter[key].to.toString() !== "Invalid Date" && this.filter[key].to < at) {
+        if (this.filter.conditions[key].to.toString() !== "Invalid Date" && this.filter.conditions[key].to < at) {
           return false
         }
         return true
@@ -181,30 +192,30 @@ export default class FiltableTable extends React.PureComponent {
     }
   }
 
-  handleClickFilter(event) {
-    this.filterLabel.prev = this.filterLabel.current
-    this.filterLabel.current = event.target.title
-    if (this.filterLabel.current !== this.filterLabel.prev) {
+  handleChangePage(page) {
+    this.setState({
+      page: page
+    })
+  }
+
+  handleClickFilterButton(event) {
+    this.filter.label.prev = this.filter.label.current
+    this.filter.label.current = event.target.title
+    if (this.filter.label.current !== this.filter.label.prev) {
       this.form.filter.reset()
-      this.setState({
-        toggle: !this.state.toggle
-      })
+      this.forceUpdate()
     }
   }
 
   handleSubmitFilter(data) {
-    this.filter[this.filterLabel.current] = Object.assign({}, data)
-    this.setState({
-      toggle: !this.state.toggle
-    })
+    this.filter.conditions[this.filter.label.current] = Object.assign({}, data)
+    this.forceUpdate()
   }
 
   handleClearFilter(data) {
-    delete this.filter[this.filterLabel.current]
+    delete this.filter.conditions[this.filter.label.current]
     this.form.filter.reset()
-    this.setState({
-      toggle: !this.state.toggle
-    })
+    this.forceUpdate()
   }
 
 }
