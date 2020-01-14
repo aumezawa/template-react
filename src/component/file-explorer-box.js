@@ -1,4 +1,4 @@
-import React from "react"
+import React, {useEffect, useRef, useReducer} from "react"
 import PropTypes from "prop-types"
 import ClassNames from "classnames"
 
@@ -6,120 +6,62 @@ import axios from "axios"
 import path from "path"
 
 import TreeNode from "./tree-node.js"
+import EmbeddedButton from "./embedded-button.js"
 
-export default class FileExplorerBox extends React.PureComponent {
+const FileExplorerBox = React.memo(props => {
+  const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
 
-  constructor(props) {
-    super(props)
-    this.state = {
-      toggle: false
+  const ls = useRef(undefined)
+
+  useEffect(() => {
+    if (props.path === "") {
+      return
     }
-    this.data = {}
-  }
-
-  static get propTypes() {
-    return ({
-      path  : PropTypes.string,
-      onView: PropTypes.func
-    })
-  }
-
-  static get defaultProps() {
-    return ({
-      path  : undefined,
-      onView: undefined
-    })
-  }
-
-  static get CONST() {
-    return ({
-      LABELS: ["view", "DL"]
-    })
-  }
-
-  componentDidMount() {
-    if (this.props.path) {
-      this.load()
-    }
-  }
-
-  render() {
-    return (
-      <div>
-        <TreeNode
-          source={ this.data.ls }
-          isName={ node => node.name }
-          isLeaf={ node => node.file }
-          isChild={ node => node.children }
-          labels={ FileExplorerBox.CONST.LABELS }
-          onClick={ data => this.handleClick(data) }
-        />
-      </div>
-    )
-  }
-
-  load() {
-    const uri = location.protocol + "//" + location.host + this.props.path + "?cmd=ls"
+    const uri = location.protocol + "//" + location.host + props.path + "?cmd=ls"
     axios.get(uri)
     .then(res => {
       if (!res.data.success) {
         throw new Error("no directory found")
       }
-      this.data.ls = res.data.ls
-      this.setState({
-        toggle: !this.state.toggle
-      })
+      ls.current = res.data.ls
+      forceUpdate()
     })
     .catch(err => {
-      this.data.ls = undefined
       alert("Could not view the directory...")
     })
-  }
+  }, [props.path])
 
-  handleClick(data) {
-    switch (FileExplorerBox.CONST.LABELS[data.func]) {
-      case "view":
-        this.handleClickView(data)
-        break
+  const handleClickView = e => {
+    const filepath = e.target.parentNode.title
+    const uri = location.protocol + "//" + location.host + filepath + "?cmd=jat"
 
-      case "DL":
-        this.handleClickDownload(data)
-        break
-
-      default:
-        break
-    }
-  }
-
-  handleClickView(data) {
-    const uri = location.protocol + "//" + location.host + path.join(path.dirname(this.props.path), data.file) + "?cmd=jat"
-
-    this.data.file = path.basename(data.file)
     axios.get(uri)
     .then(res => {
       if (!res.data.success) {
         throw new Error("no file found")
       }
-      this.data.table = res.data.table
-      if (this.props.onView) {
-        this.props.onView(this.data)
+      if (props.onView) {
+        props.onView({
+          filename: path.basename(filepath),
+          content : res.data.table
+        })
       }
     })
     .catch(err => {
-      this.data.table = undefined
       alert("Could not view the file...")
     })
   }
 
-  handleClickDownload(data) {
-    const uri = location.protocol + "//" + location.host + path.join(path.dirname(this.props.path), data.file)
+  const handleClickDownload = e => {
+    const filepath = e.target.parentNode.title
+    const uri = location.protocol + "//" + location.host + filepath
     axios.get(uri, {
       responseType: "blob"
     })
     .then(res => {
       const link = document.createElement("a")
       link.href = URL.createObjectURL(new Blob([res.data]))
-      link.setAttribute("download", path.basename(data.file))
+      link.setAttribute("download", path.basename(filepath))
       document.body.appendChild(link)
       link.click()
     })
@@ -128,4 +70,47 @@ export default class FileExplorerBox extends React.PureComponent {
     })
   }
 
+  return (
+    <div className={ props.className }>
+      <TreeNode
+        source={ ls.current }
+        isName={ node => node.name }
+        isLeaf={ node => node.file }
+        isChild={ node => node.children }
+        path={ props.path }
+        buttons={ [
+          <EmbeddedButton
+            key="view"
+            label="view"
+            title="view"
+            on={ true }
+            onClick={ handleClickView }
+          />,
+          <EmbeddedButton
+            key="download"
+            label="DL"
+            title="download"
+            on={ true }
+            onClick={ handleClickDownload }
+          />
+        ] }
+      />
+    </div>
+  )
+}, (p, n) => {
+  return p.path === n.path
+})
+
+FileExplorerBox.propTypes = {
+  path      : PropTypes.string,   // re-rendering property
+  className : PropTypes.string,
+  onView    : PropTypes.func
 }
+
+FileExplorerBox.defaultProps = {
+  path      : "",
+  className : "",
+  onView    : undefined
+}
+
+export default FileExplorerBox

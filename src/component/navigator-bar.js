@@ -1,52 +1,47 @@
-import React from "react"
+import React, {useRef} from "react"
 import PropTypes from "prop-types"
 
-export default class NavigatorBar extends React.PureComponent {
+import uniqueId from "../lib/uniqueId.js"
 
-  constructor(props) {
-    super(props)
-    this.state = {}
-  }
+const NavigatorBar = React.memo(props => {
+  const id = useRef({
+    menu: "dropdownMenu-" + uniqueId()
+  })
 
-  static get propTypes() {
-    return ({
-      title: PropTypes.string,
-      items: PropTypes.array
-    })
-  }
-
-  static get defaultProps() {
-    return ({
-      title: "Navigation Bar",
-      items: [<h6 className="dropdown-header" key="nothing">Nothing</h6>]
-    })
-  }
-
-  render() {
-    return (
-      <nav className="navbar navbar-dark bg-dark">
-        <p className="navbar-brand">{ this.props.title }</p>
-        <div className="dropdown">
-          <button
-            type="button"
-            id="dropdownMenuButton"
-            className="btn btn-secondary dropdown-toggle"
-            data-toggle="dropdown"
-            aria-haspopup="true"
-            aria-expanded="false"
-          >
-            Menu
-          </button>
-          <div
-            className="dropdown-menu dropdown-menu-right"
-            aria-labelledby="dropdownMenuButton"
-            style={ { "zIndex": 9999 } }
-          >
-            { this.props.items }
-          </div>
+  return (
+    <nav className="navbar navbar-dark bg-dark">
+      <p className="navbar-brand">{ props.title }</p>
+      <div className="dropdown">
+        <button
+          className="btn btn-secondary dropdown-toggle"
+          type="button"
+          id={ id.current.menu }
+          data-toggle="dropdown"
+          aria-haspopup="true"
+          aria-expanded="false"
+        >
+          Menu
+        </button>
+        <div
+          className="dropdown-menu dropdown-menu-right"
+          aria-labelledby={ id.current.menu }
+          style={ { "zIndex": 9999 } }
+        >
+          { props.items }
         </div>
-      </nav>
-    )
-  }
+      </div>
+    </nav>
+  )
+}, (p, n) => true)
 
+NavigatorBar.propTypes = {
+  title: PropTypes.string,
+  items: PropTypes.array
 }
+
+NavigatorBar.defaultProps = {
+  title: "Navigation Bar",
+  items: [<h6 className="dropdown-header" key="nothing">Nothing</h6>]
+}
+
+export default NavigatorBar

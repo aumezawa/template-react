@@ -1,112 +1,132 @@
-import React from "react"
+import React, {useState, useRef} from "react"
 import PropTypes from "prop-types"
 import ClassNames from "classnames"
 
+import ButtonSet from "./button-set.js"
+import CheckForm from "./check-form.js"
 import DateForm from "./date-form.js"
 
-export default class DateFilterForm extends React.PureComponent {
+const TextFilterForm = React.memo(props => {
+  const [enableFrom , setEnableFrom]  = useState(true)
+  const [validFrom  , setValidFrom]   = useState(true)
+  const [enableTo   , setEnableTo]    = useState(true)
+  const [validTo    , setValidTo]     = useState(true)
 
-  constructor(props) {
-    super(props)
-    this.state = {
-      valid : false
+  const data = useRef({
+    enable: {
+      from: true,
+      to  : true
+    },
+    date: {
+      from: new Date(),
+      to  : new Date()
     }
-    this.data = {}
-    this.children = {}
+  })
+
+  const defaultDate = useRef({
+    from: data.current.date.from.toISOString().slice(0, 19),
+    to  : data.current.date.to.toISOString().slice(0, 19)
+  })
+
+  const isValid = key => {
+    if (data.current.enable[key] && data.current.date[key].toString() === "Invalid Date") {
+      return false
+    }
+    return true
   }
 
-  static get propTypes() {
-    return ({
-      className : PropTypes.string,
-      disabled  : PropTypes.bool,
-      onChange  : PropTypes.func
-    })
+  const handleChangeCheckFrom = check => {
+    data.current.enable.from = check
+    setEnableFrom(check)
+    setValidFrom(isValid("from"))
   }
 
-  static get defaultProps() {
-    return ({
-      className : "",
-      disabled  : false,
-      onChange  : undefined
-    })
+  const handleChangeDateFrom = date => {
+    data.current.date.from = date
+    setValidFrom(isValid("from"))
   }
 
-  componentDidMount() {
-    this.init()
+  const handleChangeCheckTo = check => {
+    data.current.enable.to = check
+    setEnableTo(check)
+    setValidTo(isValid("to"))
   }
 
-  render() {
-    return (
-      <div className={ this.props.className }>
-        <DateForm
-          ref={ ref => this.children.from = ref }
-          label="From:"
-          muteable={ true }
-          disabled={ this.props.disabled }
-          onChange={ (valid, date) => this.handleChangeFrom(valid, date) }
+  const handleChangeDateTo = date => {
+    data.current.date.to = date
+    setValidTo(isValid("to"))
+  }
+
+  const handleSubmit = () => {
+    if (props.onSubmit) {
+      props.onSubmit(data.current)
+    }
+  }
+
+  const handleCancel = () => {
+    if (props.onCancel) {
+      props.onCancel()
+    }
+  }
+
+  return (
+    <div className={ props.className }>
+      <div className="form-row align-items-center mb-3">
+        <CheckForm
+          className="col-auto"
+          label="Enable"
+          dafault={ enableFrom }
+          disabled={ props.disabled }
+          onChange={ handleChangeCheckFrom }
         />
         <DateForm
-          ref={ ref => this.children.to = ref }
-          label="To:"
-          muteable={ true }
-          disabled={ this.props.disabled }
-          onChange={ (valid, date) => this.handleChangeTo(valid, date) }
+          valid={ validFrom }
+          className="col"
+          label="From"
+          default={ defaultDate.current.from }
+          disabled={ props.disabled || !enableFrom }
+          onChange={ handleChangeDateFrom }
         />
       </div>
-    )
-  }
+      <div className="form-row align-items-center mb-3">
+        <CheckForm
+          className="col-auto"
+          label="Enable"
+          dafault={ enableTo }
+          disabled={ props.disabled }
+          onChange={ handleChangeCheckTo }
+        />
+        <DateForm
+          valid={ validTo }
+          className="col"
+          label="To"
+          default={ defaultDate.current.to }
+          disabled={ props.disabled || !enableTo }
+          onChange={ handleChangeDateTo }
+        />
+      </div>
+      <ButtonSet
+        submit="Filter"
+        disabled={ !validFrom || !validTo }
+        onSubmit={ handleSubmit }
+        onCancel={ handleCancel }
+      />
+    </div>
+  )
+}, (p, n) => {
+  return p.disabled === n.disabled
+})
 
-  init(newValid = this.isValid()) {
-    this.data = {
-      from: this.children.from.data.valid ? this.children.from.data.date : new Date("Invalid Date"),
-      to  : this.children.to.data.valid ? this.children.to.data.date : new Date("Invalid Date")
-    }
-    this.setState({
-      valid: newValid
-    })
-    return newValid
-  }
-
-  isValid(valid = true, exceptKeys = []) {
-    return Object.keys(this.children).reduce((acc, key) => {
-      if (exceptKeys.includes(key)) {
-        return acc
-      } else {
-        return acc && this.children[key].state.valid
-      }
-    }, valid)
-  }
-
-  handleChangeFrom(valid, data) {
-    this.data.from = data.valid ? data.date : new Date("Invalid Date")
-
-    let newValid = this.isValid(valid, ["from"])
-    this.setState({
-      valid: newValid
-    })
-
-    if (this.props.onChange) {
-      this.props.onChange(newValid, this.data)
-    }
-  }
-
-  handleChangeTo(valid, data) {
-    this.data.to = data.valid ? data.date : new Date("Invalid Date")
-
-    let newValid = this.isValid(valid, ["to"])
-    this.setState({
-      valid: newValid
-    })
-
-    if (this.props.onChange) {
-      this.props.onChange(newValid, this.data)
-    }
-  }
-
-  reset() {
-    return this.init(Object.keys(this.children).reduce((acc, key) => {
-      return this.children[key].reset() && acc
-    }, true))
-  }
-
+TextFilterForm.propTypes = {
+  className : PropTypes.string,
+  disabled  : PropTypes.bool,   // re-rendering property
+  onSubmit  : PropTypes.func
 }
+
+TextFilterForm.defaultProps = {
+  className : "",
+  disabled  : false,
+  onSubmit  : undefined
+}
+
+export default TextFilterForm

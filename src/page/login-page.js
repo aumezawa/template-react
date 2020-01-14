@@ -1,38 +1,27 @@
 import React from "react"
 import PropTypes from "prop-types"
 
-import LoginBox from "../component/login-box.js"
+import CenterFrame from "../component/center-frame.js"
+import UserLoginBox from "../component/user-login-box.js"
 import NavigatorBar from "../component/navigator-bar.js"
-import NavigatorItem from "../component/navigator-item.js"
 
-export default class LoginPage extends React.PureComponent {
+const LoginPage = React.memo((props) => (
+  <div className="container-fluid">
+    <NavigatorBar title={ props.project } />
+    <CenterFrame main={
+      <UserLoginBox />
+    } />
+  </div>
+), (p, n) => true)
 
-  constructor(props) {
-    super(props)
-    this.state = {}
-  }
-
-  static get propTypes() {
-    return ({
-      project : PropTypes.string,
-      user    : PropTypes.string
-    })
-  }
-
-  static get defaultProps() {
-    return ({
-      project : "unaffiliated",
-      user    : "anonymous"
-    })
-  }
-
-  render() {
-    return (
-      <div className="container-fluid">
-        <NavigatorBar title={ this.props.project } />
-        <LoginBox />
-      </div>
-    )
-  }
-
+LoginPage.propTypes = {
+  project : PropTypes.string,
+  user    : PropTypes.string
 }
+
+LoginPage.defaultProps = {
+  project : "unaffiliated",
+  user    : "anonymous"
+}
+
+export default LoginPage

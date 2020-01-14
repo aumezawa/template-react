@@ -113,11 +113,9 @@ router.get("*", Auth.isAuthenticated, (req, res, next) => {
             success : true,
             table   : {
               "format": {
-                "title"     : "",
-                "keys"      : ["Content"],
+                "labels"    : [{ "name": "Content", "type": "text" }],
                 "hasHeader" : true,
-                "hasIndex"  : true,
-                "contentKey": "Content"
+                "hasIndex"  : true
               },
               "data": data.split(/\r\n|\n|\r/).map(line => { return { Content: line } })
             }

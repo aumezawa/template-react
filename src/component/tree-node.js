@@ -1,139 +1,95 @@
-import React from "react"
+import React, {useState, useRef} from "react"
 import PropTypes from "prop-types"
-import ClassNames from "classnames"
+
+import TreeLeaf from "./tree-leaf.js"
 
 import uniqueId from "../lib/uniqueId.js"
 
-import EmbeddedButton from "./embedded-button.js"
+const TreeNode = React.memo(props => {
+  const [open, setOpen] = useState(false)
 
-export default class TreeNode extends React.PureComponent {
+  const id = useRef({
+    collapse: "collapse-" + uniqueId()
+  })
 
-  constructor(props) {
-    super(props)
-    this.state = {
-      open: false
-    }
-    this.id = {
-      node    : "node-" + uniqueId(),
-      collapse: "collapse-" + uniqueId()
-    }
-    this.data = {}
+  const handleClickNode = () => {
+    setOpen(!open)
   }
 
-  static get propTypes() {
-    return ({
-      source  : PropTypes.object,
-      isName  : PropTypes.func.isRequired,
-      isLeaf  : PropTypes.func.isRequired,
-      isChild : PropTypes.func.isRequired,
-      labels  : PropTypes.array,
-      onClick : PropTypes.func,
-      path    : PropTypes.string,
-      indent  : PropTypes.number
-    })
-  }
-
-  static get defaultProps() {
-    return ({
-      source  : undefined,
-      isName  : undefined,
-      isLeaf  : undefined,
-      isChild : undefined,
-      labels  : [],
-      onClick : undefined,
-      path    : "",
-      indent  : 0
-    })
-  }
-
-  render() {
-    return (
-      <ul className="list-group">
-        <button
-          type="button"
-          className="list-group-item list-group-item-action list-group-item-info rounded-0 text-left text-monospace py-2"
-          data-toggle="collapse"
-          data-target={ "#" + this.id.collapse }
-          aria-expanded="false"
-          aria-controls={ this.id.collapse }
-          onClick={ e => this.handleClickNode(e) }
-        >
-          { "-".repeat(this.props.indent) } { this.state.open ? "[-]" : "[+]" } { this.props.source && this.props.isName(this.props.source) }
-        </button>
-        <ul className="list-group collapse" id={ this.id.collapse }>
-          { this.renderChildren() }
-        </ul>
-      </ul>
-    )
-  }
-
-  renderChildren() {
+  const renderChildren = () => {
     try {
-      return this.props.isChild(this.props.source).map(child => {
-        let dirpath = this.props.path + "/" + this.props.isName(this.props.source)
-        let filepath = dirpath + "/" + this.props.isName(child)
-        if (this.props.isLeaf(child)) {
+      return props.isChild(props.source).map(child => {
+        let nodepath = props.path + "/" + props.isName(child)
+        if (props.isLeaf(child)) {
           return (
-            <li
-              className="list-group-item list-group-item-action list-group-item-light rounded-0 text-left text-monospace py-2"
-              key={ this.id.node + filepath }
-            >
-              { "-".repeat(this.props.indent + 1) } { this.props.isName(child) }
-              {
-                this.props.labels.map((label, index) => {
-                  return (
-                    <EmbeddedButton
-                      key={ this.id.node + filepath + index }
-                      label={ label }
-                      title={ filepath + ":" + index}
-                      on={ true }
-                      onClick={ e => this.handleClickLeaf(e) }
-                    />
-                  )
-                })
-              }
-            </li>
+            <TreeLeaf
+              key={ nodepath }
+              path={ nodepath }
+              label={ props.isName(child) }
+              buttons={ props.buttons }
+              depth={ props.depth + 1 }
+            />
           )
         } else {
           return (
             <TreeNode
-              key={ this.id.node + filepath }
+              key={ nodepath }
               source={ child }
-              isName={ this.props.isName }
-              isLeaf={ this.props.isLeaf }
-              isChild={ this.props.isChild }
-              labels={ this.props.labels }
-              onClick={ this.props.onClick }
-              path={ dirpath }
-              indent={ this.props.indent + 1 }
+              isName={ props.isName }
+              isLeaf={ props.isLeaf }
+              isChild={ props.isChild }
+              path={ nodepath }
+              buttons={ props.buttons }
+              depth={ props.depth + 1 }
             />
           )
         }
       })
     } catch {
-      return (
-        <li
-          className="list-group-item list-group-item-action list-group-item-light rounded-0 text-left text-monospace py-2"
-        >
-          Invalid input data...
-        </li>
-      )
+      return <TreeLeaf label="Invalid input data..." />
     }
   }
 
-  handleClickNode(event) {
-    this.setState({
-      open: !this.state.open
-    })
-  }
+  return (
+    <ul className="list-group text-left text-monospace">
+      <button
+        className="list-group-item list-group-item-action list-group-item-info rounded-0 py-2"
+        type="button"
+        data-toggle="collapse"
+        data-target={ "#" + id.current.collapse }
+        aria-expanded="false"
+        aria-controls={ id.current.collapse }
+        onClick={ handleClickNode }
+      >
+        { "-".repeat(props.depth) } { open ? "[-]" : "[+]" } { props.source && props.isName(props.source) }
+      </button>
+      <ul className="list-group collapse" id={ id.current.collapse }>
+        { renderChildren() }
+      </ul>
+    </ul>
+  )
+}, (p, n) => {
+  return p.source === n.source
+})
 
-  handleClickLeaf(event) {
-    let data = event.target.title.split(":")
-    this.data.file = data[0]
-    this.data.func = (data.length > 1) ? Number(data[1]) : 0
-    if (this.props.onClick) {
-      this.props.onClick(this.data)
-    }
-  }
-
+TreeNode.propTypes = {
+  source  : PropTypes.object,           // re-rendering property
+  isName  : PropTypes.func.isRequired,
+  isLeaf  : PropTypes.func.isRequired,
+  isChild : PropTypes.func.isRequired,
+  path    : PropTypes.string,
+  buttons : PropTypes.array,
+  depth   : PropTypes.number
 }
+
+TreeNode.defaultProps = {
+  source  : undefined,
+  isName  : undefined,
+  isLeaf  : undefined,
+  isChild : undefined,
+  path    : "",
+  buttons : [],
+  depth   : 0
+}
+
+export default TreeNode

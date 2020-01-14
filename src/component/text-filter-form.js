@@ -1,123 +1,95 @@
-import React from "react"
+import React, {useState, useRef} from "react"
 import PropTypes from "prop-types"
 
+import ButtonSet from "./button-set.js"
 import SelectForm from "./select-form.js"
 import TextForm from "./text-form.js"
 
-export default class TextFilterForm extends React.PureComponent {
+const options = ["Be included", "Not be included", "Regex"]
+export const MODE_INCLUDED      = 0
+export const MODE_NOT_INCLUDED  = 1
+export const MODE_REGEX         = 2
 
-  constructor(props) {
-    super(props)
-    this.state = {
-      valid : false
-    }
-    this.data = {}
-    this.children = {}
+const TextFilterForm = React.memo(props => {
+  const [valid, setValid] = useState(false)
+
+  const refs = useRef({
+    select: React.createRef(),
+    text  : React.createRef()
+  })
+
+  const data = useRef({
+    mode: 0,
+    text: ""
+  })
+
+  const handleChangeMode = mode => {
+    data.current.mode = mode
   }
 
-  static get propTypes() {
-    return ({
-      className : PropTypes.string,
-      disabled  : PropTypes.bool,
-      onChange  : PropTypes.func
-    })
+  const handleChangeText = text => {
+    data.current.text = text
+    text !== "" ? setValid(true) : setValid(false)
   }
 
-  static get defaultProps() {
-    return ({
-      className : "",
-      disabled  : false,
-      onChange  : undefined
-    })
-  }
-
-  static get CONST() {
-    return ({
-      MODE_INCLUDED     : 0,
-      MODE_NOT_INCLUDED : 1,
-      MODE_REGEX        : 2
-    })
-  }
-
-  static get modeOptions() {
-    return ["Be included", "Not be included", "Regex"]
-  }
-
-  componentDidMount() {
-    this.init()
-  }
-
-  render() {
-    return (
-      <div className={ this.props.className }>
-        <SelectForm
-          ref={ ref => this.children.mode = ref }
-          label="Mode:"
-          options={ TextFilterForm.modeOptions }
-          disabled={ this.props.disabled }
-          onChange={ (valid, data) => this.handleChangeMode(valid, data) }
-        />
-        <TextForm
-          ref={ ref => this.children.text = ref }
-          label="Condition:"
-          disabled={ this.props.disabled }
-          onChange={ (valid, data) => this.handleChangeText(valid, data) }
-        />
-      </div>
-    )
-  }
-
-  init(newValid = this.isValid()) {
-    this.data = {
-      mode      : this.children.mode.data.index,
-      condition : this.children.text.data.text
-    }
-    this.setState({
-      valid: newValid
-    })
-    return newValid
-  }
-
-  isValid(valid = true, exceptKeys = []) {
-    return Object.keys(this.children).reduce((acc, key) => {
-      if (exceptKeys.includes(key)) {
-        return acc
-      } else {
-        return acc && this.children[key].state.valid
-      }
-    }, valid)
-  }
-
-  handleChangeMode(valid, data) {
-    this.data.mode = data.index
-
-    let newValid = this.isValid(valid, ["mode"])
-    this.setState({
-      valid: newValid
-    })
-
-    if (this.props.onChange) {
-      this.props.onChange(newValid, this.data)
+  const handleSubmit = () => {
+    if (props.onSubmit) {
+      props.onSubmit(data.current)
     }
   }
 
-  handleChangeText(valid, data) {
-    this.data.condition = data.text
-
-    let newValid = this.isValid(valid, ["text"])
-    this.setState({
-      valid: newValid
-    })
-
-    if (this.props.onChange) {
-      this.props.onChange(newValid, this.data)
+  const handleCancel = () => {
+    console.log(refs)
+    data.current.mode = refs.current.select.current.value = 0
+    data.current.text = refs.current.text.current.value   = ""
+    setValid(false)
+    if (props.onCancel) {
+      props.onCancel()
     }
   }
 
-  reset() {
-    return this.init(Object.keys(this.children).reduce((acc, key) => {
-      return this.children[key].reset() && acc
-    }, true))
-  }
+  return (
+    <div className={ props.className }>
+      <SelectForm
+        ref={ refs.current.select }
+        valid={ true }
+        options={ options }
+        label="Mode"
+        disabled={ props.disabled }
+        onChange={ handleChangeMode }
+      />
+      <TextForm
+        ref={ refs.current.text }
+        valid={ valid }
+        label="Condition"
+        disabled={ props.disabled }
+        onChange={ handleChangeText }
+      />
+      <ButtonSet
+        submit="Filter"
+        cancel="Clear"
+        disabled={ !valid }
+        onSubmit={ handleSubmit }
+        onCancel={ handleCancel }
+      />
+    </div>
+  )
+}, (p, n) => {
+  return p.disabled === n.disabled
+})
 
+TextFilterForm.propTypes = {
+  className : PropTypes.string,
+  disabled  : PropTypes.bool,   // re-rendering property
+  onSubmit  : PropTypes.func,
+  onCancel  : PropTypes.func
 }
+
+TextFilterForm.defaultProps = {
+  className : "",
+  disabled  : false,
+  onSubmit  : undefined,
+  onCancel  : undefined
+}
+
+export default TextFilterForm

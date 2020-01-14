@@ -1,79 +1,59 @@
-import React from 'react'
-import PropTypes from 'prop-types'
-import ClassNames from "classnames"
+import React, {useRef} from "react"
+import PropTypes from "prop-types"
+
+import TabLabel from "./tab-label.js"
+import TabItem from "./tab-item.js"
 
 import uniqueId from "../lib/uniqueId.js"
 
-export default class TabFrame extends React.PureComponent {
+const TabFrame = props => {
+  const id = useRef({
+    label : "label-" + uniqueId(),
+    item  : "item-"  + uniqueId()
+  })
 
-  constructor(props) {
-    super(props)
-    this.state = {}
-    this.id = {
-      tab: "tab-" + uniqueId(),
-      item: "item-" + uniqueId()
-    }
-  }
-
-  static get propTypes() {
-    return ({
-      labels: PropTypes.array.isRequired,
-      items : PropTypes.array.isRequired
-    })
-  }
-
-  static get defaultProps() {
-    return ({
-      labels: undefined,
-      items : undefined
-    })
-  }
-
-  render() {
-    return (
-      <div>
-        <ul className="nav nav-tabs nav-justified">
-          {
-            this.props.labels.map((label, index) => {
-              return (
-                <li className="nav-item" key={ this.id.tab + index }>
-                  <a
-                    className={ ClassNames({ "nav-link": true, "active": index === 0 }) }
-                    id={ this.id.tab + index }
-                    key={ this.id.tab + index }
-                    data-toggle="tab"
-                    href={ "#" + this.id.item + index }
-                    role="tab"
-                    aria-controls={ this.id.item + index }
-                    aria-selected="true"
-                  >
-                    { label }
-                  </a>
-                </li>
-              )
-            })
-          }
-        </ul>
-
-        <div className="tab-content">
-          {
-            this.props.items.map((item, index) => {
-              return (
-                <div
-                  className={ ClassNames({ "tab-pane": true, "fade": true, "show": index === 0, "active": index === 0 }) }
-                  id={ this.id.item + index }
-                  key={ this.id.tab + index }
-                  role="tabpanel"
-                  aria-labelledby={ this.id.tab + index }
-                >
-                  { item }
-                </div>
-              )
-            })
-          }
-        </div>
+  return (
+    <div className={ props.className }>
+      <ul className="nav nav-tabs nav-justified">
+        {
+          props.labels.map((label, index) => (
+            <TabLabel
+              key={ label }
+              label={ label }
+              labelId={ id.current.label + index }
+              itemId={ id.current.item + index }
+              active={ index === 0 }
+            />
+          ))
+        }
+      </ul>
+      <div className="tab-content">
+        {
+          props.items.map((item, index) => (
+            <TabItem
+              key={ id.current.item + index }
+              item={ item }
+              labelId={ id.current.label + index }
+              itemId={ id.current.item + index }
+              active={ index === 0 }
+            />
+          ))
+        }
       </div>
-    )
-  }
-
+    </div>
+  )
 }
+
+TabFrame.propTypes = {
+  labels    : PropTypes.array.isRequired,
+  items     : PropTypes.array.isRequired,
+  className : PropTypes.string
+}
+
+TabFrame.defaultProps = {
+  labels    : undefined,
+  items     : undefined,
+  className : ""
+}
+
+export default TabFrame
