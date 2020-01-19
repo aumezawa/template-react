@@ -1,17 +1,14 @@
-import React from "react"
+import React, { useCallback } from "react"
 import PropTypes from "prop-types"
-import ClassNames from "classnames"
 
 const SelectForm = React.memo(React.forwardRef((props, ref) => {
-  const handleChange = e => {
+  const valid = (props.valid) ? "" : "is-invalid"
+
+  const handleChange = useCallback(e => {
     if (props.onChange) {
       props.onChange(Number(e.target.value))
     }
-  }
-
-  const options = props.options.map((value, index) => {
-    return <option key={ value } value={ index }>{ value }</option>
-  })
+  }, [props.onChange])
 
   return (
     <div className={ props.className }>
@@ -21,25 +18,23 @@ const SelectForm = React.memo(React.forwardRef((props, ref) => {
         </div>
         <select
           ref={ ref }
-          className={ ClassNames({ "form-control": true, "is-invalid": !props.valid }) }
+          className={ `form-control ${ valid } ` }
           disabled={ props.disabled }
           onChange={ handleChange }
         >
-          { options }
+          { props.options.map((value, index) => <option key={ value } value={ index }>{ value }</option>) }
         </select>
       </div>
     </div>
   )
-}), (p, n) => {
-  return p.valid === n.valid && p.disabled === n.disabled
-})
+}))
 
 SelectForm.propTypes = {
-  valid     : PropTypes.bool.isRequired,  // re-rendering property
+  valid     : PropTypes.bool.isRequired,
   options   : PropTypes.array.isRequired,
   className : PropTypes.string,
   label     : PropTypes.string,
-  disabled  : PropTypes.bool,             // re-rendering property
+  disabled  : PropTypes.bool,
   onChange  : PropTypes.func
 }
 

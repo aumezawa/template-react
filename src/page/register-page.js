@@ -19,7 +19,7 @@ const LoginPage = React.memo((props) => (
       <UserRegisterBox />
     } />
   </div>
-), (p, n) => true)
+))
 
 LoginPage.propTypes = {
   project : PropTypes.string,

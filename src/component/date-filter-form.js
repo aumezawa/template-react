@@ -1,10 +1,11 @@
-import React, {useState, useRef} from "react"
+import React, { useState, useRef, useCallback } from "react"
 import PropTypes from "prop-types"
-import ClassNames from "classnames"
 
 import ButtonSet from "./button-set.js"
 import CheckForm from "./check-form.js"
 import DateForm from "./date-form.js"
+
+import LocalDate from "../lib/date.js"
 
 const TextFilterForm = React.memo(props => {
   const [enableFrom , setEnableFrom]  = useState(true)
@@ -18,8 +19,8 @@ const TextFilterForm = React.memo(props => {
       to  : true
     },
     date: {
-      from: new Date(),
-      to  : new Date()
+      from: LocalDate(9),
+      to  : LocalDate(9)
     }
   })
 
@@ -28,46 +29,41 @@ const TextFilterForm = React.memo(props => {
     to  : data.current.date.to.toISOString().slice(0, 19)
   })
 
-  const isValid = key => {
-    if (data.current.enable[key] && data.current.date[key].toString() === "Invalid Date") {
-      return false
-    }
-    return true
-  }
+  const isValid = key => (!data.current.enable[key] || data.current.date[key].toString() !== "Invalid Date") ? true : false
 
-  const handleChangeCheckFrom = check => {
+  const handleChangeCheckFrom = useCallback(check => {
     data.current.enable.from = check
     setEnableFrom(check)
     setValidFrom(isValid("from"))
-  }
+  }, [true])
 
-  const handleChangeDateFrom = date => {
+  const handleChangeDateFrom = useCallback(date => {
     data.current.date.from = date
     setValidFrom(isValid("from"))
-  }
+  }, [true])
 
-  const handleChangeCheckTo = check => {
+  const handleChangeCheckTo = useCallback(check => {
     data.current.enable.to = check
     setEnableTo(check)
     setValidTo(isValid("to"))
-  }
+  }, [true])
 
-  const handleChangeDateTo = date => {
+  const handleChangeDateTo = useCallback(date => {
     data.current.date.to = date
     setValidTo(isValid("to"))
-  }
+  }, [true])
 
-  const handleSubmit = () => {
+  const handleSubmit = useCallback(() => {
     if (props.onSubmit) {
       props.onSubmit(data.current)
     }
-  }
+  }, [props.onSubmit])
 
-  const handleCancel = () => {
+  const handleCancel = useCallback(() => {
     if (props.onCancel) {
       props.onCancel()
     }
-  }
+  }, [props.onCancel])
 
   return (
     <div className={ props.className }>
@@ -106,25 +102,25 @@ const TextFilterForm = React.memo(props => {
         />
       </div>
       <ButtonSet
+        className=""
         submit="Filter"
+        cancel="Clear"
         disabled={ !validFrom || !validTo }
         onSubmit={ handleSubmit }
         onCancel={ handleCancel }
       />
     </div>
   )
-}, (p, n) => {
-  return p.disabled === n.disabled
 })
 
 TextFilterForm.propTypes = {
   className : PropTypes.string,
-  disabled  : PropTypes.bool,   // re-rendering property
+  disabled  : PropTypes.bool,
   onSubmit  : PropTypes.func
 }
 
 TextFilterForm.defaultProps = {
-  className : "",
+  className : "mb-3",
   disabled  : false,
   onSubmit  : undefined
 }

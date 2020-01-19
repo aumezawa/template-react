@@ -1,4 +1,4 @@
-import React, {useState, useRef} from "react"
+import React, { useState, useRef, useCallback } from "react"
 import PropTypes from "prop-types"
 
 import ButtonSet from "./button-set.js"
@@ -20,25 +20,25 @@ const FileUploadForm = React.memo(props => {
     fileobj   : undefined
   })
 
-  const handleChangeText = text => {
+  const handleChangeText = useCallback(text => {
     data.current.directory = text
     const valid = !!text.match(/^[0-9a-zA-Z_/]*$/)
     setValidText(valid)
-  }
+  }, [true])
 
-  const handleChangeFile = (filename, fileobj) => {
-    data.current.filename = filename
-    data.current.fileobj  = fileobj
-    filename !== "" ? setValidFile(true) : setValidFile(false)
-  }
+  const handleChangeFile = useCallback(file => {
+    data.current.filename = file.name
+    data.current.fileobj  = file.obj
+    file.name !== "" ? setValidFile(true) : setValidFile(false)
+  }, [true])
 
-  const handleSubmit = () => {
+  const handleSubmit = useCallback(() => {
     if (props.onSubmit) {
       props.onSubmit(data.current)
     }
-  }
+  }, [props.onSubmit])
 
-  const handleCancel = () => {
+  const handleCancel = useCallback(() => {
     data.current.directory  = refs.current.text.current.value = ""
     data.current.filename   = refs.current.file.current.value = ""
     data.current.fileobj    = undefined
@@ -46,7 +46,7 @@ const FileUploadForm = React.memo(props => {
     if (props.onCancel) {
       props.onCancel()
     }
-  }
+  }, [props.onCancel])
 
   return (
     <div className={ props.className }>
@@ -73,13 +73,11 @@ const FileUploadForm = React.memo(props => {
       />
     </div>
   )
-}, (p, n) => {
-  return p.disabled === n.disabled
 })
 
 FileUploadForm.propTypes = {
   className : PropTypes.string,
-  disabled  : PropTypes.bool,   // re-rendering property
+  disabled  : PropTypes.bool,
   onSubmit  : PropTypes.func,
   onCancel  : PropTypes.func
 }

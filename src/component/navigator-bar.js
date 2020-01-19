@@ -1,4 +1,4 @@
-import React, {useRef} from "react"
+import React, { useRef } from "react"
 import PropTypes from "prop-types"
 
 import uniqueId from "../lib/uniqueId.js"
@@ -32,7 +32,7 @@ const NavigatorBar = React.memo(props => {
       </div>
     </nav>
   )
-}, (p, n) => true)
+})
 
 NavigatorBar.propTypes = {
   title: PropTypes.string,

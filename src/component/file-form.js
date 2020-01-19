@@ -1,23 +1,25 @@
-import React, {useRef} from "react"
+import React, { useRef, useCallback } from "react"
 import PropTypes from "prop-types"
-import ClassNames from "classnames"
 
 import path from "path"
 
 import uniqueId from "../lib/uniqueId.js"
 
 const FileForm = React.memo(React.forwardRef((props, ref) => {
+  const valid = (props.valid) ? "" : "is-invalid"
+
   const id = useRef({
     form: uniqueId()
   })
 
-  const handleChange = e => {
+  const handleChange = useCallback(e => {
     if (props.onChange) {
-      const filename = path.basename(event.target.value.replace(/\\/g, "/"))
-      const fileobj  = event.target.files[0]
-      props.onChange(filename, fileobj)
+      props.onChange({
+        name: path.basename(event.target.value.replace(/\\/g, "/")),
+        obj : event.target.files[0]
+      })
     }
-  }
+  }, [props.onChange])
 
   return (
     <div className={ props.className }>
@@ -28,7 +30,7 @@ const FileForm = React.memo(React.forwardRef((props, ref) => {
         <div className="custom-file">
           <input
             ref={ ref }
-            className={ ClassNames({ "custom-file-input": true, "is-invalid": !props.valid }) }
+            className={ `custom-file-input ${ valid }` }
             type="file"
             id={ id.current.form }
             disabled={ props.disabled }
@@ -39,16 +41,14 @@ const FileForm = React.memo(React.forwardRef((props, ref) => {
       </div>
     </div>
   )
-}), (p, n) => {
-  return p.valid === n.valid && p.label === n.label && p.disabled === n.disabled
-})
+}))
 
 FileForm.propTypes = {
-  valid     : PropTypes.bool.isRequired,  // re-rendering property
+  valid     : PropTypes.bool.isRequired,
   className : PropTypes.string,
   label     : PropTypes.string,
-  filename  : PropTypes.string,           // re-rendering property
-  disabled  : PropTypes.bool,             // re-rendering property
+  filename  : PropTypes.string,
+  disabled  : PropTypes.bool,
   onChange  : PropTypes.func
 }
 

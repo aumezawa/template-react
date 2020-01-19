@@ -1,15 +1,15 @@
-import React from "react"
+import React, { useCallback } from "react"
 import PropTypes from "prop-types"
 
 import range from "../lib/range.js"
 
 const Pagination = React.memo(props => {
-  const handleClick = e => {
+  const handleClick = useCallback(e => {
     e.preventDefault()
     if (props.onChange) {
       props.onChange(Number(e.target.title))
     }
-  }
+  }, [props.onChange])
 
   const renderItem = () => {
     return range(props.current - props.range, props.current + props.range).map(value => {
@@ -42,7 +42,7 @@ const Pagination = React.memo(props => {
           <li className="page-item">
             <a className="page-link" href="#" title={ props.first } onClick={ handleClick }>&laquo;</a>
           </li>
-          { renderItem() }
+            { renderItem() }
           <li className="page-item">
             <a className="page-link" href="#" title={ props.last } onClick={ handleClick }>&raquo;</a>
           </li>
@@ -50,15 +50,13 @@ const Pagination = React.memo(props => {
       </nav>
     </div>
   )
-}, (p, n) => {
-  return p.current === n.current && p.first === n.first && p.last === n.last
 })
 
 Pagination.propTypes = {
   className : PropTypes.string,
-  current   : PropTypes.number,   // re-rendering property
-  first     : PropTypes.number,   // re-rendering property
-  last      : PropTypes.number,   // re-rendering property
+  current   : PropTypes.number,
+  first     : PropTypes.number,
+  last      : PropTypes.number,
   range     : PropTypes.number,
   onChange  : PropTypes.func
 }

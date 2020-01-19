@@ -1,22 +1,25 @@
 import React from "react"
 import PropTypes from "prop-types"
-import ClassNames from "classnames"
 
-const TabLabel = props => (
-  <li className="nav-item">
-    <a
-      className={ ClassNames({ "nav-link": true, "active": props.active }) }
-      id={ props.labelId }
-      data-toggle="tab"
-      href={ "#" + props.itemId }
-      role="tab"
-      aria-controls={ props.itemId }
-      aria-selected="true"
-    >
-      { props.label }
-    </a>
-  </li>
-)
+const TabLabel = props => {
+  const active = (props.active) ? "active" : ""
+
+  return (
+    <li className="nav-item">
+      <a
+        className={ `nav-link ${ active }` }
+        id={ props.labelId }
+        data-toggle="tab"
+        href={ "#" + props.itemId }
+        role="tab"
+        aria-controls={ props.itemId }
+        aria-selected="true"
+      >
+        { props.label }
+      </a>
+    </li>
+  )
+}
 
 TabLabel.propTypes = {
   label   : PropTypes.string.isRequired,

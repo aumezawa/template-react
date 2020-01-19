@@ -1,16 +1,14 @@
 import React from "react"
 import PropTypes from "prop-types"
 
-const TreeLeaf = React.memo(props => {
-  return (
-    <li
-      className="list-group-item list-group-item-action list-group-item-light rounded-0 py-2"
-      title={ props.path }
-    >
-      { "-".repeat(props.depth) } { props.label } { props.buttons }
-    </li>
-  )
-}, (p, n) => true)
+const TreeLeaf = props => (
+  <li
+    className="list-group-item list-group-item-action list-group-item-light rounded-0 py-2"
+    title={ props.path }
+  >
+    { "-".repeat(props.depth) } { props.label } { props.buttons }
+  </li>
+)
 
 TreeLeaf.propTypes = {
   path    : PropTypes.string,

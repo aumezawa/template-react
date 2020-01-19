@@ -9,16 +9,14 @@ const uriPath = "/data"
 const dirPath = path.join(__dirname, "..", "..", "data")
 
 const router = express.Router()
-const upload = multer({
-  storage: multer.diskStorage({
-    destination: (req, file, cb) => {
-      cb(null, path.join(dirPath + req.path))
-    },
-    filename: (req, file, cb) => {
-      cb(null, file.originalname)
-    }
-  })
-})
+const upload = (req, res, next) => {
+  return multer({
+    storage: multer.diskStorage({
+      destination : (req, file, cb) => cb(null, path.join(dirPath + req.path)),
+      filename    : (req, file, cb) => cb(null, file.originalname)
+    })
+  }).single("file")(req, res, err => (err ? next(err) : next()))
+}
 
 router.get("*", Auth.isAuthenticated, (req, res, next) => {
   if (!req.query.cmd) {
@@ -29,17 +27,13 @@ router.get("*", Auth.isAuthenticated, (req, res, next) => {
   switch (req.query.cmd) {
     case "stat":
       fs.promises.stat(reqPath)
-      .then(stats => {
-        return res.json({
-          success : true,
-          name    : path.basename(reqPath),
-          file    : stats.isFile(),
-          update  : stats.mtime
-        })
-      })
-      .catch(err => {
-        return res.json({ success : false })
-      })
+      .then(stats => res.json({
+        success : true,
+        name    : path.basename(reqPath),
+        file    : stats.isFile(),
+        update  : stats.mtime
+      }))
+      .catch(err => res.json({ success : false }))
       break
 
     case "ls":
@@ -49,11 +43,9 @@ router.get("*", Auth.isAuthenticated, (req, res, next) => {
             return ({
               name: path.basename(node),
               file: false,
-              children: fs.readdirSync(node).map(name => {
-                return ls(path.join(node, name))
-              })
+              children: fs.readdirSync(node).map(name => ls(path.join(node, name))).filter(x => x)
             })
-          } else {
+          } else if (!(node.includes(".cmt"))) {
             return ({
               name: path.basename(node),
               file: true
@@ -72,21 +64,15 @@ router.get("*", Auth.isAuthenticated, (req, res, next) => {
 
     case "mkdir":
       fs.promises.mkdir(reqPath, { recursive: true })
-      .then(() => {
-        return res.json({ success : true })
-      })
-      .catch(err => {
-        return res.json({ success : false })
-      })
+      .then(() => res.json({ success : true }))
+      .catch(err => res.json({ success : false }))
       break
 
     case "rm":
       try {
         const rm = node => {
           if (fs.statSync(node).isDirectory()) {
-            fs.readdirSync(node).forEach(name => {
-              rm(path.join(node, name))
-            })
+            fs.readdirSync(node).forEach(name => rm(path.join(node, name)))
             fs.rmdirSync(node)
           } else {
             fs.unlinkSync(node)
@@ -100,31 +86,47 @@ router.get("*", Auth.isAuthenticated, (req, res, next) => {
       }
       break
 
-    case "jat":
-      fs.promises.readFile(reqPath, "utf8")
-      .then(data => {
-        if (path.extname(reqPath) === ".json") {
-          return res.json({
-            success : true,
-            table   : JSON.parse(data)
-          })
-        } else {
-          return res.json({
-            success : true,
-            table   : {
-              "format": {
-                "labels"    : [{ "name": "Content", "type": "text" }],
-                "hasHeader" : true,
-                "hasIndex"  : true
-              },
-              "data": data.split(/\r\n|\n|\r/).map(line => { return { Content: line } })
-            }
-          })
-        }
+    case "json":
+      // TODO: should use json schema
+      if (path.extname(reqPath) === ".json") {
+        fs.promises.readFile(reqPath, "utf8")
+        .then(data => res.json({
+          success : true,
+          table   : JSON.parse(data)
+        }))
+        .catch(err => res.json({ success : false }))
+      } else {
+        fs.promises.readFile(reqPath, "utf8")
+        .then(data => res.json({
+          success : true,
+          table   : {
+            "format": {
+              "labels"    : [{ "name": "Content", "type": "text" }],
+              "hasHeader" : true,
+              "hasIndex"  : true,
+              "contentKey": "Content"
+            },
+            "data": data.split(/\r\n|\n|\r/).map(line => ({ Content: line }))
+          }
+        }))
+        .catch(err => res.json({ success : false }))
+      }
+      break
+
+    case "comment":
+      fs.promises.stat(reqPath)
+      .then(() => {
+        fs.promises.readFile(reqPath + ".cmt", "utf8")
+        .then(data => res.json({
+          success : true,
+          comments: JSON.parse(data)
+        }))
+        .catch(err => res.json({
+          success : true,
+          comments: {}
+        }))
       })
-      .catch(err => {
-        return res.json({ success : false })
-      })
+      .catch(err => res.json({ success: false }))
       break
 
     default:
@@ -132,8 +134,42 @@ router.get("*", Auth.isAuthenticated, (req, res, next) => {
   }
 })
 
-router.post("*", Auth.isAuthenticated, upload.single("file"), (req, res, next) => {
-  return res.json({ success: true })
+router.post("*", Auth.isAuthenticated, upload, (req, res, next) => {
+  if (req.file) {
+    return res.json({ success : true })
+  }
+
+  if (req.body.cmd) {
+    const reqPath = path.join(dirPath, req.path)
+    switch (req.body.cmd) {
+      case "comment":
+        let line = req.body.line
+        let comment = JSON.parse(req.body.comment)
+        let comments = {}
+        return fs.promises.readFile(reqPath + ".cmt", "utf8")
+        .then(data => {
+          comments = JSON.parse(data)
+        })
+        .catch(err => {
+          comments = {}
+        })
+        .then(() => {
+          if (!(line in comments)) {
+            comments[line] = []
+          }
+          comments[line].push(comment)
+          return fs.promises.writeFile(reqPath + ".cmt", JSON.stringify(comments))
+        })
+        .then(() => res.json({ success: true }))
+        .catch(err => res.json({ success: false }))
+        break
+
+      default:
+        return res.json({ success: false })
+    }
+  }
+
+  return next()
 })
 
 module.exports = router

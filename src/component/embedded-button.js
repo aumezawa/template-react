@@ -1,19 +1,20 @@
-import React from "react"
+import React, { useCallback } from "react"
 import PropTypes from "prop-types"
-import ClassNames from "classnames"
 
 const EmbeddedButton = React.memo(props => {
-  const handleClick = e => {
+  const color = (props.on) ? "badge-success" : "badge-light"
+
+  const handleClick = useCallback(e => {
     if (props.onClick) {
       props.onClick(e)
     }
-  }
+  }, [props.onClick])
 
   return (
     <>
       { "  " }
       <span
-        className={ ClassNames({ "badge": true, "badge-btn": true, "badge-success": props.on, "badge-light": !props.on }) }
+        className={ `badge badge-btn ${ color }` }
         title={ props.title }
         data-toggle={ props.toggle }
         data-target={ "#" + props.target }
@@ -23,14 +24,12 @@ const EmbeddedButton = React.memo(props => {
       </span>
     </>
   )
-}, (p, n) => {
-  return p.on === n.on
 })
 
 EmbeddedButton.propTypes = {
   label   : PropTypes.string,
   title   : PropTypes.string,
-  on      : PropTypes.bool,     // re-rendering property
+  on      : PropTypes.bool,
   toggle  : PropTypes.string,
   target  : PropTypes.string,
   onClick : PropTypes.func

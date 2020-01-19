@@ -1,6 +1,5 @@
-import React, {useState, useRef} from "react"
+import React, { useState, useRef, useCallback } from "react"
 import PropTypes from "prop-types"
-import ClassNames from "classnames"
 
 import axios from "axios"
 import crypto from "crypto"
@@ -13,8 +12,9 @@ const UserLoginBox = React.memo(props => {
   const [success, setSuccess] = useState(false)
 
   const message = useRef(`Please input your "username" and "password". (between 4 - 16 characters with [0-9a-zA-Z])`)
+  const color   = done ? (success ? "success" : "failure") : "normal"
 
-  const handleSubmit = data => {
+  const handleSubmit = useCallback(data => {
     let uri = location.href
     let params = new URLSearchParams()
     params.append("username", data.username)
@@ -36,13 +36,13 @@ const UserLoginBox = React.memo(props => {
       setDone(true)
       setSuccess(false)
     })
-  }
+  }, [props.redirectSec])
 
   return (
     <div className={ props.className }>
       <MessageCard
         message={ message.current }
-        type={ done ? (success ? "success" : "failure") : "normal" }
+        type={ `${ color }` }
       />
       <UserLoginForm
         disabled={ success }
@@ -50,7 +50,7 @@ const UserLoginBox = React.memo(props => {
       />
     </div>
   )
-}, (p, n) => true)
+})
 
 UserLoginBox.propTypes = {
   className   : PropTypes.string,

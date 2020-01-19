@@ -1,22 +1,25 @@
-import React, {useState} from "react"
+import React, { useState } from "react"
 import PropTypes from "prop-types"
-import ClassNames from "classnames"
 
-const ProgressBar = props => (
-  <div className={ props.className }>
-    <div className="progress">
-      <div
-        className={ ClassNames({"progress-bar": true, "progress-bar-striped": true, "progress-bar-animated": props.progress !== 100 }) }
-        role="progressbar"
-        aria-valuenow={ props.progress }
-        aria-valuemin="0"
-        aria-valuemax="100"
-        style={ { width: props.progress + "%" } }
-      >
+const ProgressBar = props => {
+  const animation = (props.progress !== 100) ? "progress-bar-animated" : ""
+
+  return (
+    <div className={ props.className }>
+      <div className="progress">
+        <div
+          className={ `progress-bar progress-bar-striped ${ animation }` }
+          role="progressbar"
+          aria-valuenow={ props.progress }
+          aria-valuemin="0"
+          aria-valuemax="100"
+          style={ { width: props.progress + "%" } }
+        >
+        </div>
       </div>
     </div>
-  </div>
-)
+  )
+}
 
 ProgressBar.propTypes = {
   className : PropTypes.string,

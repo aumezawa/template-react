@@ -1,20 +1,20 @@
-import React, {useState, useRef} from "react"
+import React, { useState, useRef, useCallback } from "react"
 import PropTypes from "prop-types"
 
 import TreeLeaf from "./tree-leaf.js"
 
 import uniqueId from "../lib/uniqueId.js"
 
-const TreeNode = React.memo(props => {
+const TreeNode = props => {
   const [open, setOpen] = useState(false)
 
   const id = useRef({
     collapse: "collapse-" + uniqueId()
   })
 
-  const handleClickNode = () => {
+  const handleClickNode = useCallback(() => {
     setOpen(!open)
-  }
+  }, [true])
 
   const renderChildren = () => {
     try {
@@ -68,12 +68,10 @@ const TreeNode = React.memo(props => {
       </ul>
     </ul>
   )
-}, (p, n) => {
-  return p.source === n.source
-})
+}
 
 TreeNode.propTypes = {
-  source  : PropTypes.object,           // re-rendering property
+  source  : PropTypes.object,
   isName  : PropTypes.func.isRequired,
   isLeaf  : PropTypes.func.isRequired,
   isChild : PropTypes.func.isRequired,

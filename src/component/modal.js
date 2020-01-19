@@ -1,62 +1,54 @@
-import React, {useRef} from "react"
+import React, { useRef, useCallback } from "react"
 import PropTypes from "prop-types"
-import ClassNames from "classnames"
 
 import uniqueId from "../lib/uniqueId.js"
 
-const Modal = React.memo(props => {
+const Modal = props => {
+  const display = (props.message === "") ? "d-none" : ""
+
   const id = useRef({
     label: uniqueId()
   })
 
-  const handleClose = e => {
-    if (props.onClose){
-      props.onClose()
-    }
-  }
-
   return (
     <div className="modal fade" id={ props.id } tabIndex="-1" role="dialog" aria-labelledby={ id.current.label } aria-hidden="true">
-      <div className="modal-dialog modal-dialog-centered" role="document">
+      <div className={ `modal-dialog modal-dialog-centered modal-dialog-scrollable ${ props.size }` } role="document">
         <div className="modal-content">
           <div className="modal-header">
             <h5 className="modal-title" id={ id.current.label }>{ props.title }</h5>
-            <button className="close" type="button" data-dismiss="modal" aria-label="Close" onClick={ handleClose }>
+            <p className={ `${ display }` }>{ props.message }</p>
+            <button className="close" type="button" data-dismiss="modal" aria-label="Close">
               <span aria-hidden="true">&times;</span>
             </button>
           </div>
           <div className="modal-body">
-            <div className={ ClassNames({ "d-none": props.message === ""  }) }>
-              <div className="text-left">{ props.message }</div>
-              <br  />
-            </div>
             { props.body }
           </div>
           <div className="modal-footer">
-            <button className="btn btn-secondary" type="button" data-dismiss="modal" onClick={ handleClose }>Close</button>
+            { props.footer }
           </div>
         </div>
       </div>
     </div>
   )
-}, (p, n) => {
-  return p.title === n.title && p.message === n.message
-})
+}
 
 Modal.propTypes = {
   id      : PropTypes.string.isRequired,
-  title   : PropTypes.string,             // re-rendering property
-  message : PropTypes.string,             // re-rendering property
+  title   : PropTypes.string,
+  message : PropTypes.string,
+  size    : PropTypes.string,
   body    : PropTypes.element,
-  onClose : PropTypes.func
+  button  : PropTypes.element
 }
 
 Modal.defaultProps = {
   id      : undefined,
   title   : "Title",
   message : "",
+  size    : "",
   body    : <>Nothing to do...</>,
-  onClose : undefined
+  footer  : <button className="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
 }
 
 export default Modal

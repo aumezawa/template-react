@@ -1,19 +1,21 @@
-import React, {useEffect, useRef, useReducer} from "react"
+import React, { useEffect, useRef, useCallback, useReducer } from "react"
 import PropTypes from "prop-types"
-import ClassNames from "classnames"
 
 import axios from "axios"
 import path from "path"
 
-import TreeLeaf from "./tree-leaf.js"
 import EmbeddedButton from "./embedded-button.js"
+import TreeLeaf from "./tree-leaf.js"
 
 const DirectoryListBox = React.memo(props => {
   const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
 
-  const ls = useRef(undefined)
+  const ls = useRef([])
 
   useEffect(() => {
+    if (props.path === "") {
+      return
+    }
     const uri = location.protocol + "//" + location.host + props.path + "?cmd=ls"
     axios.get(uri)
     .then(res => {
@@ -28,11 +30,11 @@ const DirectoryListBox = React.memo(props => {
     })
   }, [props.path])
 
-  const handleSelect = e => {
+  const handleSelect = useCallback(e => {
     if (props.onSelect) {
       props.onSelect(e.target.parentNode.title)
     }
-  }
+  }, [props.onSelect])
 
   const renderList = () => {
     try {
@@ -66,23 +68,21 @@ const DirectoryListBox = React.memo(props => {
   return (
     <div className={ props.className }>
       <ul className="list-group text-left text-monospace">
-      { renderList() }
+        { renderList() }
       </ul>
     </div>
   )
-}, (p, n) => {
-  return p.path === n.path
 })
 
 DirectoryListBox.propTypes = {
-  path      : PropTypes.string.isRequired,  // re-rendering property
   className : PropTypes.string,
+  path      : PropTypes.string,
   onSelect  : PropTypes.func
 }
 
 DirectoryListBox.defaultProps = {
-  path      : undefined,
   className : "",
+  path      : undefined,
   onSelect  : undefined
 }
 

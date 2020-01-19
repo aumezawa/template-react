@@ -1,19 +1,20 @@
-import React from "react"
+import React, { useCallback } from "react"
 import PropTypes from "prop-types"
-import ClassNames from "classnames"
 
 const ButtonSet = React.memo(props => {
-  const handleSubmit = e => {
+  const handleSubmit = useCallback(e => {
     if (props.onSubmit) {
       props.onSubmit()
     }
-  }
+  }, [props.onSubmit])
 
-  const handleCancel = e => {
+  const handleCancel = useCallback(e => {
     if (props.onCancel) {
       props.onCancel()
     }
-  }
+  }, [props.onCancel])
+
+  const display = (props.cancel === "") ? "d-none" : ""
 
   return (
     <div className={ props.className }>
@@ -28,10 +29,11 @@ const ButtonSet = React.memo(props => {
             { props.submit }
           </button>
         </div>
-        <div className={ ClassNames({ "col-auto": true, "d-none": props.cancel === "" }) }>
+        <div className={ `col-auto ${ display }` }>
           <button
             className="btn btn-secondary"
             type="button"
+            data-dismiss={ props.dismiss }
             onClick={ handleCancel }
           >
             { props.cancel }
@@ -40,15 +42,13 @@ const ButtonSet = React.memo(props => {
       </div>
     </div>
   )
-}, (p, n) => {
-  return p.disabled === n.disabled
 })
 
 ButtonSet.propTypes = {
   className : PropTypes.string,
   submit    : PropTypes.string,
   cancel    : PropTypes.string,
-  disabled  : PropTypes.bool,   // re-rendering property
+  disabled  : PropTypes.bool,
   onSubmit  : PropTypes.func,
   onCancel  : PropTypes.func
 }
@@ -58,6 +58,7 @@ ButtonSet.defaultProps = {
   submit    : "Submit",
   cancel    : "Cancel",
   disabled  : false,
+  dismiss   : "",
   onSubmit  : undefined,
   onCancel  : undefined
 }

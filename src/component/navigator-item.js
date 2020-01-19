@@ -10,7 +10,7 @@ const NavigatorItem = React.memo(props => (
   >
     { props.label }
   </button>
-), (p, n) => true)
+))
 
 NavigatorItem.propTypes = {
   label   : PropTypes.string,

@@ -1,13 +1,14 @@
-import React from "react"
+import React, { useCallback } from "react"
 import PropTypes from "prop-types"
-import ClassNames from "classnames"
 
 const TextForm = React.memo(React.forwardRef((props, ref) => {
-  const handleChange = e => {
+  const valid = (props.valid) ? "" : "is-invalid"
+
+  const handleChange = useCallback(e => {
     if (props.onChange) {
       props.onChange(e.target.value)
     }
-  }
+  }, [props.onChange])
 
   return (
     <div className={ props.className }>
@@ -17,7 +18,7 @@ const TextForm = React.memo(React.forwardRef((props, ref) => {
         </div>
         <input
           ref={ ref }
-          className={ ClassNames({ "form-control": true, "text-monospace": true, "is-invalid": !props.valid }) }
+          className={ `form-control text-monospace ${ valid }` }
           type={ props.type }
           disabled={ props.disabled }
           onChange={ handleChange }
@@ -25,16 +26,14 @@ const TextForm = React.memo(React.forwardRef((props, ref) => {
       </div>
     </div>
   )
-}), (p, n) => {
-  return p.valid === n.valid && p.disabled === n.disabled
-})
+}))
 
 TextForm.propTypes = {
-  valid     : PropTypes.bool.isRequired,  // re-rendering property
+  valid     : PropTypes.bool.isRequired,
   className : PropTypes.string,
   label     : PropTypes.string,
   type      : PropTypes.string,
-  disabled  : PropTypes.bool,             // re-rendering property
+  disabled  : PropTypes.bool,
   onChange  : PropTypes.func
 }
 

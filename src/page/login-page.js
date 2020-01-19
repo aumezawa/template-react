@@ -8,11 +8,9 @@ import NavigatorBar from "../component/navigator-bar.js"
 const LoginPage = React.memo((props) => (
   <div className="container-fluid">
     <NavigatorBar title={ props.project } />
-    <CenterFrame main={
-      <UserLoginBox />
-    } />
+    <CenterFrame main={ <UserLoginBox /> } />
   </div>
-), (p, n) => true)
+))
 
 LoginPage.propTypes = {
   project : PropTypes.string,

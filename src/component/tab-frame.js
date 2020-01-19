@@ -1,4 +1,4 @@
-import React, {useRef} from "react"
+import React, { useRef } from "react"
 import PropTypes from "prop-types"
 
 import TabLabel from "./tab-label.js"
@@ -18,7 +18,7 @@ const TabFrame = props => {
         {
           props.labels.map((label, index) => (
             <TabLabel
-              key={ label }
+              key={ index }
               label={ label }
               labelId={ id.current.label + index }
               itemId={ id.current.item + index }
@@ -31,7 +31,7 @@ const TabFrame = props => {
         {
           props.items.map((item, index) => (
             <TabItem
-              key={ id.current.item + index }
+              key={ index }
               item={ item }
               labelId={ id.current.label + index }
               itemId={ id.current.item + index }

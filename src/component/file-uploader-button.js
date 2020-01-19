@@ -1,6 +1,5 @@
-import React, {useRef} from "react"
+import React, { useRef, useCallback } from "react"
 import PropTypes from "prop-types"
-import ClassNames from "classnames"
 
 import FileUploaderBox from "./file-uploader-box.js"
 import Modal from "./modal.js"
@@ -12,6 +11,12 @@ const FileUploaderButton = React.memo(props => {
     modal: "modal-" + uniqueId()
   })
 
+  const handleDone = useCallback(() => {
+    if (props.onDone) {
+      props.onDone()
+    }
+  }, [props.onDone])
+
   return (
     <div className="my-3">
       <div className="form-row justify-content-center">
@@ -20,7 +25,7 @@ const FileUploaderButton = React.memo(props => {
             id={ id.current.modal }
             title={ props.label }
             body={
-              <FileUploaderBox path={ props.path } />
+              <FileUploaderBox path={ props.path } onDone={ handleDone } />
             }
           />
           <button
@@ -35,18 +40,20 @@ const FileUploaderButton = React.memo(props => {
       </div>
     </div>
   )
-}, (p, n) => true)
+})
 
 FileUploaderButton.propTypes = {
   path      : PropTypes.string.isRequired,
   className : PropTypes.string,
-  label     : PropTypes.string
+  label     : PropTypes.string,
+  onDone    : PropTypes.func
 }
 
 FileUploaderButton.defaultProps = {
   path      : undefined,
   className : "",
-  label     : "File Uploader"
+  label     : "File Uploader",
+  onDone    : undefined
 }
 
 export default FileUploaderButton

@@ -1,13 +1,16 @@
-import React from "react"
+import React, { useCallback } from "react"
 import PropTypes from "prop-types"
-import ClassNames from "classnames"
+
+import LocalDate from "../lib/date.js"
 
 const DateForm = React.memo(props => {
-  const handleChange = e => {
+  const valid = (props.valid) ? "" : "is-invalid"
+
+  const handleChange = useCallback(e => {
     if (props.onChange) {
       props.onChange(new Date(event.target.value))
     }
-  }
+  }, [props.onChange])
 
   return (
     <div className={ props.className }>
@@ -16,7 +19,7 @@ const DateForm = React.memo(props => {
           <span className="input-group-text">{ props.label }</span>
         </div>
         <input
-          className={ ClassNames({ "form-control": true, "is-invalid": !props.valid }) }
+          className={ `form-control ${ valid }` }
           type="datetime-local"
           step="1"
           disabled={ props.disabled }
@@ -26,16 +29,14 @@ const DateForm = React.memo(props => {
       </div>
     </div>
   )
-}, (p, n) => {
-  return p.valid === n.valid && p.disabled === n.disabled
 })
 
 DateForm.propTypes = {
-  valid     : PropTypes.bool.isRequired,  // re-rendering property
+  valid     : PropTypes.bool.isRequired,
   className : PropTypes.string,
   label     : PropTypes.string,
   default   : PropTypes.string,
-  disabled  : PropTypes.bool,             // re-rendering property
+  disabled  : PropTypes.bool,
   onChange  : PropTypes.func
 }
 
@@ -43,7 +44,7 @@ DateForm.defaultProps = {
   valid     : undefined,
   className : "mb-3",
   label     : "Date",
-  dafault   : (new Date()).toISOString().slice(0, 19),
+  default   : LocalDate(9).toISOString().slice(0, 19),
   disabled  : false,
   onChange  : undefined
 }

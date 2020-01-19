@@ -1,75 +1,106 @@
-import React, {useState, useEffect, useRef, useReducer} from "react"
+import React, { useState, useEffect, useRef, useCallback, useReducer } from "react"
 import PropTypes from "prop-types"
-import ClassNames from "classnames"
 
+import CommentEditorModal from "./comment-editor-modal.js"
 import DateFilterForm from "./date-filter-form.js"
 import EmbeddedButton from "./embedded-button.js"
 import Modal from "./modal.js"
 import Pagination from "../component/pagination.js"
-import TextFilterForm, {MODE_INCLUDED, MODE_NOT_INCLUDED, MODE_REGEX} from "./text-filter-form.js"
+import TextFilterForm, { MODE_INCLUDED, MODE_NOT_INCLUDED, MODE_REGEX } from "./text-filter-form.js"
 
 import uniqueId from "../lib/uniqueId.js"
 
 const FunctionalTable = React.memo(props => {
   const [page, setPage] = useState(1)
 
-  const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
+  const [ignored, forceUpdate]  = useReducer(x => x + 1, 0)
+  const [formId,  clearForm]    = useReducer(x => x + 1, 0)
 
-  const rows = useRef(0)
-
-  const filter = useRef({})
-
-  const label = useRef(undefined)
+  const label     = useRef(undefined)
+  const filter    = useRef({ "#": false })
+  const rows      = useRef(0)
+  const line      = useRef(0)
+  const comments  = useRef([])
 
   const id = useRef({
-    text: "modal-" + uniqueId(),
-    date: "modal-" + uniqueId()
+    text    : "modal-" + uniqueId(),
+    date    : "modal-" + uniqueId(),
+    comment : "modal-" + uniqueId()
   })
 
   useEffect(() => {
-    filter.current = {}
-    forceUpdate()
-  }, [props.source])
+    filter.current = { "#": false }
+    setPage(1)
+  }, [props.table])
 
-  const handleClickFilter = e => {
+  useEffect(() => {
+    setPage(1)
+  }, [rows.current])
+
+  useEffect(() => {
+    comments.current = (`${ line.current }` in props.comments) ? props.comments[`${ line.current }`] : []
+    clearForm()
+  }, [props.comments])
+
+  const handleClickFilter = useCallback(e => {
     label.current = e.target.title
-  }
+  }, [true])
 
-  const handleSubmitTextFilter = data => {
+  const handleSubmitTextFilter = useCallback(data => {
     filter.current[label.current] = Object.assign({ type: "text" }, data)
     forceUpdate()
-  }
+  }, [true])
 
-  const handleCancelTextFilter = () => {
+  const handleCancelTextFilter = useCallback(() => {
     delete filter.current[label.current]
     forceUpdate()
-  }
+  }, [true])
 
-  const handleSubmitDateFilter = data => {
+  const handleSubmitDateFilter = useCallback(data => {
     filter.current[label.current] = Object.assign({ type: "date" }, data)
     forceUpdate()
-  }
+  }, [true])
 
-  const handleCancelDateFilter = data => {
+  const handleCancelDateFilter = useCallback(() => {
     delete filter.current[label.current]
     forceUpdate()
-  }
+  }, [true])
 
-  const handleChangePage = page => {
+  const handleChangePage = useCallback(page => {
     setPage(page)
-  }
+  }, [true])
+
+  const handleClickFilterComment = useCallback(() => {
+    filter.current["#"] = !filter.current["#"]
+    forceUpdate()
+  }, [true])
+
+  const handleClickComment = useCallback(e => {
+    line.current = Number(e.target.title)
+    comments.current = (`${ line.current }` in props.comments) ? props.comments[`${ line.current }`] : []
+    forceUpdate()
+  }, [props.comments])
+
+  const handleSubmitComment = useCallback(data => {
+    if (props.onComment) {
+      props.onComment({
+        line    : line.current,
+        comment : data.text
+      })
+    }
+  }, [props.onComment])
 
   const renderTitle = () => {
     try {
-      return <h5>{ `${ props.title } - ${ props.source.format.title }` }</h5>
+      return <h5>{ `${ props.name } - ${ props.table.format.title }` }</h5>
     } catch {
-      return <h5>{ `${ props.title } - Untitled` }</h5>
+      return <h5>{ `${ props.name } - Untitled` }</h5>
     }
   }
 
   const renderHeader = () => {
     try {
-      const format = props.source.format
+      const format = props.table.format
       let header = []
       if (format.hasHeader) {
         if (format.hasIndex) {
@@ -88,6 +119,17 @@ const FunctionalTable = React.memo(props => {
             />
           </th>
         )))
+        if (props.comments) {
+          header.push(
+            <th key="comment" scope="col">
+              <EmbeddedButton
+                label="#"
+                on={ filter.current["#"] }
+                onClick={ handleClickFilterComment }
+              />
+            </th>
+          )
+        }
       }
       return <tr>{ header }</tr>
     } catch {
@@ -98,11 +140,12 @@ const FunctionalTable = React.memo(props => {
   const renderBody = () => {
     try {
       rows.current = 0
-      const format = props.source.format
-      const data = props.source.data
+      const format = props.table.format
+      const data = props.table.data
       return data.map((datum, index) => {
+        let line = index + 1
         if (!format.labels.reduce((acc, label) => {
-          return acc && isDisplay(label.name, datum[label.name])
+          return acc && isFiltered(label.name, datum[label.name]) && isFilteredByComment(line)
         }, true)) { return }
 
         rows.current++
@@ -112,21 +155,29 @@ const FunctionalTable = React.memo(props => {
 
         let row = []
         if (format.hasIndex) {
-          row = [<th key={ "index" + index } className="text-right" scope="row" >{ `${ index + 1 }:` }</th>]
+          row = [<th key={ "index" + line } className="text-right" scope="row" >{ `${ line }:` }</th>]
         }
-        row = row.concat(format.labels.map(label => (
-          <td key={ label.name + index }>{ datum[label.name] }</td>
-        )))
-        return <tr key={ "row" + index }>{ row }</tr>
+        row = row.concat(format.labels.map(label => {
+          let wrapping = (label.name === format.contentKey) ? "text-wrap text-break" : "text-nowrap"
+          return <td key={ label.name + line } className={ `${ wrapping }` }>{ datum[label.name] }</td>
+        }))
+        if (props.comments) {
+          row.push(<td key={ "comment" + line } scope="col">
+            <EmbeddedButton label="#" title={ `${ line }` } on={ `${ line }` in props.comments }
+              toggle="modal" target={ id.current.comment } onClick={ handleClickComment } /></td>
+          )
+        }
+        return <tr key={ "row" + line }>{ row }</tr>
       })
     } catch {
       return []
     }
   }
 
-  const isDisplay = (key, datum) => {
-    if (Object.keys(filter.current).length === 0) { return true }
-    if (!(key in filter.current))                 { return true }
+  const isFiltered = (key, datum) => {
+    if (!(key in filter.current)) {
+      return true
+    }
 
     switch (filter.current[key].type) {
       case "text":
@@ -149,6 +200,8 @@ const FunctionalTable = React.memo(props => {
     }
   }
 
+  const isFilteredByComment = line => ((!filter.current["#"] || `${ line }` in props.comments) ? true : false)
+
   return (
     <div className={ props.className }>
       <Modal
@@ -156,6 +209,7 @@ const FunctionalTable = React.memo(props => {
         title="Filter text"
         body={
           <TextFilterForm
+            className="my-0"
             onSubmit={ handleSubmitTextFilter }
             onCancel={ handleCancelTextFilter }
           />
@@ -166,10 +220,19 @@ const FunctionalTable = React.memo(props => {
         title="Filter date"
         body={
           <DateFilterForm
+            className="my-0"
             onSubmit={ handleSubmitDateFilter }
             onCancel={ handleCancelDateFilter }
           />
         }
+      />
+      <CommentEditorModal
+        id={ id.current.comment }
+        formId={ formId }
+        title={ `New/View comment, line: ${ line.current } ( ${ comments.current.length } comments ) ` }
+        user={ props.user }
+        comments={ comments.current }
+        onSubmit={ handleSubmitComment }
       />
       <div className="d-flex flex-column h-100">
         { renderTitle() }
@@ -189,20 +252,26 @@ const FunctionalTable = React.memo(props => {
       </div>
     </div>
   )
-}, (p, n) => {
-  return p.source === n.source
 })
 
 FunctionalTable.propTypes = {
-  source: PropTypes.object,   // re-rendering property
-  title : PropTypes.string,
-  rows  : PropTypes.number
+  className : PropTypes.string,
+  table     : PropTypes.object,
+  name      : PropTypes.string,
+  rows      : PropTypes.number,
+  user      : PropTypes.string,
+  comments  : PropTypes.object,
+  onComment : PropTypes.func
 }
 
 FunctionalTable.defaultProps = {
-  source: undefined,
-  title : "",
-  rows  : 5000
+  className : "",
+  table     : {},
+  name      : "Unnamed",
+  rows      : 5000,
+  user      : "anonymous",
+  comments  : {},
+  onComment : undefined
 }
 
 export default FunctionalTable
