@@ -4,12 +4,14 @@ import PropTypes from "prop-types"
 import axios from "axios"
 import path from "path"
 
+import AutoReloader from "./auto-reloader.js"
 import FunctionalTable from "./functional-table.js"
 
 import LocalDate from "../lib/date.js"
 
 const FunctionalTableBox = React.memo(props => {
-  const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
+  const [ignored, forceUpdate]  = useReducer(x => x + 1, 0)
+  const [formId,  clearForm]    = useReducer(x => x + 1, 0)
 
   const table     = useRef({})
   const comments  = useRef({})
@@ -71,22 +73,37 @@ const FunctionalTableBox = React.memo(props => {
       if (!res.data.success) {
         throw new Error("Comment Failed")
       }
+      clearForm()
       return loadComment()
     })
     .then(() => forceUpdate())
     .catch(err => alert(err.message))
   }, [props.path, props.user])
 
+  const handleChange = useCallback(() => {
+    loadComment()
+    .then(() => forceUpdate())
+    .catch(err => undefined)
+  }, [props.path])
+
   return (
-    <FunctionalTable
-      className={ props.className }
-      table={ table.current }
-      name={ path.basename(props.path) }
-      rows={ 5000 }
-      user={ props.user }
-      comments={ comments.current }
-      onComment={ handleSubmitComment }
-    />
+    <>
+      <AutoReloader
+        path={ props.path + ".cmt" }
+        type="file"
+        onChange={ handleChange }
+      />
+      <FunctionalTable
+        className={ props.className }
+        table={ table.current }
+        name={ path.basename(props.path) }
+        rows={ 5000 }
+        user={ props.user }
+        comments={ comments.current }
+        formId={ formId }
+        onComment={ handleSubmitComment }
+      />
+    </>
   )
 })
 

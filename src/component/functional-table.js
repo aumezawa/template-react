@@ -14,7 +14,6 @@ const FunctionalTable = React.memo(props => {
   const [page, setPage] = useState(1)
 
   const [ignored, forceUpdate]  = useReducer(x => x + 1, 0)
-  const [formId,  clearForm]    = useReducer(x => x + 1, 0)
 
   const label     = useRef(undefined)
   const filter    = useRef({ "#": false })
@@ -39,7 +38,7 @@ const FunctionalTable = React.memo(props => {
 
   useEffect(() => {
     comments.current = (`${ line.current }` in props.comments) ? props.comments[`${ line.current }`] : []
-    clearForm()
+    forceUpdate()
   }, [props.comments])
 
   const handleClickFilter = useCallback(e => {
@@ -228,7 +227,7 @@ const FunctionalTable = React.memo(props => {
       />
       <CommentEditorModal
         id={ id.current.comment }
-        formId={ formId }
+        formId={ props.formId }
         title={ `New/View comment, line: ${ line.current } ( ${ comments.current.length } comments ) ` }
         user={ props.user }
         comments={ comments.current }
@@ -261,6 +260,7 @@ FunctionalTable.propTypes = {
   rows      : PropTypes.number,
   user      : PropTypes.string,
   comments  : PropTypes.object,
+  formId    : PropTypes.number,
   onComment : PropTypes.func
 }
 
@@ -271,6 +271,7 @@ FunctionalTable.defaultProps = {
   rows      : 5000,
   user      : "anonymous",
   comments  : {},
+  formId    : 0,
   onComment : undefined
 }
 
