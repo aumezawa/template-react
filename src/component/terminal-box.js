@@ -15,13 +15,16 @@ const TerminalBox = React.memo(props => {
 
     terminal.loadAddon(fitAddon)
     terminal.open(ref.current)
-    fitAddon.fit()
 
-    const query = `?user=${ props.user }&cmd=${ props.command }&cols=${ terminal.cols }&rows=${ terminal.rows }`
-    const io = socketio(query, { path: props.path })
-    terminal.onData(data => io.emit("input", data))
-    io.on("output", data => terminal.write(data))
-  }, [props.path, props.user, props.command])
+    if (!props.disabled) {
+      fitAddon.fit()
+
+      const query = `?user=${ props.user }&cmd=${ props.command }&args=${ props.args.join(",") }&cols=${ terminal.cols }&rows=${ terminal.rows }`
+      const io = socketio(query, { path: props.path })
+      terminal.onData(data => io.emit("input", data))
+      io.on("output", data => terminal.write(data))
+    }
+  }, [props.path, props.user, props.command, props.args, props.disabled])
 
   return <div ref={ ref } className="h-100" ></div>
 })
@@ -29,13 +32,17 @@ const TerminalBox = React.memo(props => {
 TerminalBox.propTypes = {
   path    : PropTypes.string,
   user    : PropTypes.string,
-  command : PropTypes.string
+  command : PropTypes.string,
+  args    : PropTypes.array,
+  disabled: PropTypes.bool
 }
 
 TerminalBox.defaultProps = {
   path    : "/terminal",
   user    : "anonymous",
-  command : ""
+  command : "",
+  args    : [],
+  disabled: false
 }
 
 export default TerminalBox
