@@ -9,6 +9,7 @@ import MainFrame from "../component/main-frame.js"
 import NavigatorBar from "../component/navigator-bar.js"
 import NavigatorItem from "../component/navigator-item.js"
 import TabFrame from "../component/tab-frame.js"
+import TerminalBox from "../component/terminal-box.js"
 
 const MainPage = React.memo(props => {
   const [ignored, forceUpdate]  = useReducer(x => x + 1, 0)
@@ -50,7 +51,7 @@ const MainPage = React.memo(props => {
         ] }
       />
       <MainFrame
-        head={ <p className="text-center">Hello { props.user }! This is the main page.</p> }
+        head={ <p className="text-center">Hello { props.user }!</p> }
         main={ <FunctionalTableBox path={ filepath.current } user={ props.user } /> }
         left={
           <TabFrame
