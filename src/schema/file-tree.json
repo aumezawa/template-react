@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "file tree format",
+
+  "definitions": {
+    "file": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "file": {
+          "type": "boolean"
+        },
+        "link": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": ["name", "file"]
+    },
+    "directory": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "file": {
+          "type": "boolean"
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/definitions/file"
+              },
+              {
+                "$ref": "#/definitions/directory"
+              }
+            ]
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": ["name", "file", "children"]
+    }
+  },
+
+  "anyOf": [
+    {
+      "$ref": "#/definitions/file"
+    },
+    {
+      "$ref": "#/definitions/directory"
+    }
+  ]
+}

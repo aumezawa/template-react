@@ -4,8 +4,8 @@ import multer from "multer"
 import path from "path"
 
 import Auth from "./auth.js"
-
 import StorageHook from "../src/hook/storage-hook.js"
+import validateJson from "../src/schema/validateJson.js"
 
 import project from "../package.json"
 
@@ -88,29 +88,42 @@ router.get("*", Auth.isAuthenticated, (req, res, next) => {
         break
 
       case "json":
-        // TODO: should use json schema
+        const makeTable = filepath => new Promise((resolve, reject) => {
+          return fs.promises.readFile(filepath, "utf8")
+          .then(data => resolve({
+            "format": {
+              "labels"    : [{ "name": "Content", "type": "text" }],
+              "hasHeader" : true,
+              "hasIndex"  : true,
+              "contentKey": "Content"
+            },
+            "data": data.split(/\r\n|\n|\r/).map(line => ({ Content: line }))
+          }))
+          .catch(err => reject(err))
+        })
+
         if (path.extname(reqPath) === ".json") {
-          return fs.promises.readFile(reqPath, "utf8")
+          return validateJson(reqPath, "table")
           .then(data => res.json({
             success : true,
-            table   : JSON.parse(data)
+            table   : data
           }))
-          .catch(err => res.json({ success : false }))
+          .catch(err => {
+            console.log(err)
+            return makeTable(reqPath)
+            .then(data => res.json({
+              success : true,
+              table   : data
+            }))
+            .catch(err => res.json({ success: false }))
+          })
         } else {
-          return fs.promises.readFile(reqPath, "utf8")
+          return makeTable(reqPath)
           .then(data => res.json({
             success : true,
-            table   : {
-              "format": {
-                "labels"    : [{ "name": "Content", "type": "text" }],
-                "hasHeader" : true,
-                "hasIndex"  : true,
-                "contentKey": "Content"
-              },
-              "data": data.split(/\r\n|\n|\r/).map(line => ({ Content: line }))
-            }
+            table   : data
           }))
-          .catch(err => res.json({ success : false }))
+          .catch(err => res.json({ success: false }))
         }
         break
 
