@@ -19,30 +19,30 @@ const TerminalBox = React.memo(props => {
     if (!props.disabled) {
       fitAddon.fit()
 
-      const query = `?user=${ props.user }&cmd=${ props.command }&args=${ props.args.join(",") }&cols=${ terminal.cols }&rows=${ terminal.rows }`
-      const io = socketio(query, { path: props.path })
+      const query = `?user=${ props.user }&cmd=${ props.command }&cols=${ terminal.cols }&rows=${ terminal.rows }`
+      const io = socketio(encodeURI(query), { path: props.path })
       terminal.onData(data => io.emit("input", data))
       io.on("output", data => terminal.write(data))
     }
-  }, [props.path, props.user, props.command, props.args, props.disabled])
+  }, [props.path, props.user, props.command, props.disabled])
 
-  return <div ref={ ref } className="h-100" ></div>
+  return <div ref={ ref } className={ props.className}></div>
 })
 
 TerminalBox.propTypes = {
-  path    : PropTypes.string,
-  user    : PropTypes.string,
-  command : PropTypes.string,
-  args    : PropTypes.array,
-  disabled: PropTypes.bool
+  className : PropTypes.string,
+  path      : PropTypes.string,
+  user      : PropTypes.string,
+  command   : PropTypes.string,
+  disabled  : PropTypes.bool
 }
 
 TerminalBox.defaultProps = {
-  path    : "/terminal",
-  user    : "anonymous",
-  command : "",
-  args    : [],
-  disabled: false
+  className : "h-100",
+  path      : "/terminal",
+  user      : "anonymous",
+  command   : "",
+  disabled  : false
 }
 
 export default TerminalBox

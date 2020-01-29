@@ -8,9 +8,8 @@ const opt   = os.platform() === "win32" ? [] : ["-c"]
 const terminal = server => {
   const io = socketio(server, { path: "/terminal" })
   io.on("connection", socket => {
-    const command = (socket.handshake.query.cmd) ? [socket.handshake.query.cmd] : []
-    const args = (socket.handshake.query.args) ? (socket.handshake.query.args || "").split(",") : []
-    const ptyProcess = pty.spawn(shell, [...opt, ...command, ...args], {
+    const command = socket.handshake.query.cmd ? [...opt, decodeURI(socket.handshake.query.cmd)] : []
+    const ptyProcess = pty.spawn(shell, command, {
       name: "xterm-color",
       cols: Number(socket.handshake.query.cols || 80),
       rows: Number(socket.handshake.query.rows || 24),
