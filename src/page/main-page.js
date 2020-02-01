@@ -1,4 +1,4 @@
-import React, {useRef, useCallback, useReducer} from "react"
+import React, { useRef, useCallback, useReducer } from "react"
 import PropTypes from "prop-types"
 
 import DirectoryListBox from "../component/directory-list-box.js"
@@ -15,11 +15,18 @@ const MainPage = React.memo(props => {
   const [ignored, forceUpdate]  = useReducer(x => x + 1, 0)
   const [dirId,   reloadDir]    = useReducer(x => x + 1, 0)
 
+  const refs = useRef({
+    case    : React.createRef(),
+    explorer: React.createRef(),
+    upload  : React.createRef()
+  })
+
   const dirpath   = useRef("")
   const filepath  = useRef("")
 
   const handleSelectDirectory = useCallback(dirPath => {
     dirpath.current = dirPath
+    refs.current.explorer.current.click()
     forceUpdate()
   }, [true])
 
@@ -58,9 +65,10 @@ const MainPage = React.memo(props => {
             labels={ ["Case", "Explorer", "Upload"] }
             items={ [
               <DirectoryListBox key={ dirId } path="/data" onSelect={ handleSelectDirectory } />,
-              <FileExplorerBox path={ dirpath.current } onSelect={ handleSelectFile } />,
+              <FileExplorerBox key={ dirpath.current } path={ dirpath.current } onSelect={ handleSelectFile } />,
               <FileUploaderButton path="/data" onDone={ handleDoneFileUpload } />
             ] }
+            refs={ [refs.current.case, refs.current.explorer, refs.current.upload] }
           />
         }
       />

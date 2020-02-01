@@ -1,12 +1,13 @@
 import React from "react"
 import PropTypes from "prop-types"
 
-const TabLabel = props => {
+const TabLabel = React.forwardRef((props, ref) => {
   const active = (props.active) ? "active" : ""
 
   return (
     <li className="nav-item">
       <a
+        ref={ ref }
         className={ `nav-link ${ active }` }
         id={ props.labelId }
         data-toggle="tab"
@@ -19,7 +20,7 @@ const TabLabel = props => {
       </a>
     </li>
   )
-}
+})
 
 TabLabel.propTypes = {
   label   : PropTypes.string.isRequired,

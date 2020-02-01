@@ -14,7 +14,7 @@ const TreeNode = props => {
 
   const handleClickNode = useCallback(() => {
     setOpen(!open)
-  }, [true])
+  }, [open])
 
   const renderChildren = () => {
     try {

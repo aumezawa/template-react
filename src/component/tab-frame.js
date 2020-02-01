@@ -18,6 +18,7 @@ const TabFrame = props => {
         {
           props.labels.map((label, index) => (
             <TabLabel
+              ref={ props.refs[index] }
               key={ index }
               label={ label }
               labelId={ id.current.label + index }
@@ -47,12 +48,14 @@ const TabFrame = props => {
 TabFrame.propTypes = {
   labels    : PropTypes.array.isRequired,
   items     : PropTypes.array.isRequired,
+  refs      : PropTypes.array.isRequired,
   className : PropTypes.string
 }
 
 TabFrame.defaultProps = {
   labels    : undefined,
   items     : undefined,
+  refs      : undefined,
   className : ""
 }
 
