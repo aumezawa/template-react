@@ -5,7 +5,7 @@ import path from "path"
 
 import Auth from "./auth.js"
 import StorageHook from "../src/hook/storage-hook.js"
-import validateJson from "../src/schema/validateJson.js"
+import jsonValidator from "../src/schema/jsonValidator.js"
 
 import project from "../package.json"
 
@@ -103,7 +103,7 @@ router.get("*", Auth.isAuthenticated, (req, res, next) => {
         })
 
         if (path.extname(reqPath) === ".json") {
-          return validateJson(reqPath, "table")
+          return jsonValidator.validateJsonFile(reqPath, "table")
           .then(data => res.json({
             success : true,
             table   : data
