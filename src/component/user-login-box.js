@@ -18,7 +18,7 @@ const UserLoginBox = React.memo(props => {
     let uri = location.href
     let params = new URLSearchParams()
     params.append("username", data.username)
-    params.append("password", crypto.createHash("sha256").update(data.username + data.password, "utf8").digest("hex"))
+    params.append("password", props.encrypt ? crypto.createHash("sha256").update(data.username + data.password, "utf8").digest("hex") : data.password)
 
     setDone(false)
     axios.post(uri, params)
@@ -36,7 +36,7 @@ const UserLoginBox = React.memo(props => {
       setDone(true)
       setSuccess(false)
     })
-  }, [props.redirectSec])
+  }, [props.encrypt, props.redirectSec])
 
   return (
     <div className={ props.className }>
@@ -54,11 +54,13 @@ const UserLoginBox = React.memo(props => {
 
 UserLoginBox.propTypes = {
   className   : PropTypes.string,
+  encrypt     : PropTypes.bool,
   redirectSec : PropTypes.number
 }
 
 UserLoginBox.defaultProps = {
   className   : "",
+  encrypt     : true,
   redirectSec : 3
 }
 

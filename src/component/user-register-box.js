@@ -22,7 +22,7 @@ const UserRegisterBox = React.memo(props => {
     let uri = location.href
     let params = new URLSearchParams()
     params.append("username", data.username)
-    params.append("password", crypto.createHash("sha256").update(data.username + data.password, "utf8").digest("hex"))
+    params.append("password", props.encrypt ? crypto.createHash("sha256").update(data.username + data.password, "utf8").digest("hex") : data.password)
 
     setDone(false)
     axios.post(uri, params)
@@ -40,7 +40,7 @@ const UserRegisterBox = React.memo(props => {
       setDone(true)
       setSuccess(false)
     })
-  }, [true])
+  }, [props.encrypt])
 
   return (
     <div className={ props.className }>
@@ -57,11 +57,13 @@ const UserRegisterBox = React.memo(props => {
 })
 
 UserRegisterBox.propTypes = {
-  className   : PropTypes.string
+  className : PropTypes.string,
+  encrypt   : PropTypes.bool,
 }
 
 UserRegisterBox.defaultProps = {
-  className   : ""
+  className : "",
+  encrypt   : true
 }
 
 export default UserRegisterBox

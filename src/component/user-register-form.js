@@ -23,22 +23,22 @@ const UserRegisterForm = React.memo(props => {
 
   const handleChangeUsername = useCallback(text => {
     data.current.username = text
-    const valid = (text.length >= props.minUserLen) && (text.length <= props.maxUserLen) && (!!text.match(/^[0-9a-zA-Z]+$/))
+    const valid = (!!text.match(props.allowUser))
     setValidUser(valid)
-  }, [props.minUserLen, props.maxUserLen])
+  }, [props.allowUser])
 
   const handleChangePassword = useCallback(text => {
     data.current.password = text
-    const valid = (text.length >= props.minPassLen) && (text.length <= props.maxPassLen) && (!!text.match(/^[0-9a-zA-Z]+$/))
+    const valid = (!!text.match(props.allowPass))
     setValidPass(valid)
     setValidConf(data.current.password === data.current.confirm)
-  }, [props.minUserLen, props.maxUserLen])
+  }, [props.allowPass])
 
   const handleChangeConfirm = useCallback(text => {
     data.current.confirm = text
-    const valid = (text.length >= props.minPassLen) && (text.length <= props.maxPassLen) && (!!text.match(/^[0-9a-zA-Z]+$/)) && (data.current.password === data.current.confirm)
+    const valid = (!!text.match(props.allowPass)) && (data.current.password === data.current.confirm)
     setValidConf(valid)
-  }, [props.minUserLen, props.maxUserLen])
+  }, [props.allowPass])
 
   const handleSubmit = useCallback(() => {
     if (props.onSubmit) {
@@ -95,20 +95,16 @@ UserRegisterForm.propTypes = {
   className : PropTypes.string,
   disabled  : PropTypes.bool,
   onSubmit  : PropTypes.func,
-  minUserLen: PropTypes.number,
-  maxUserLen: PropTypes.number,
-  minPassLen: PropTypes.number,
-  maxPassLen: PropTypes.number
+  allowUser : PropTypes.object,
+  allowPass : PropTypes.object
 }
 
 UserRegisterForm.defaultProps = {
   className : "",
   disabled  : false,
   onSubmit  : undefined,
-  minUserLen: 4,
-  maxUserLen: 16,
-  minPassLen: 4,
-  maxPassLen: 16
+  allowUser : /^[0-9a-zA-Z]{4,16}$/,
+  allowPass : /^[0-9a-zA-Z]{4,16}$/
 }
 
 export default UserRegisterForm

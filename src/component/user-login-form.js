@@ -20,15 +20,15 @@ const UserLoginForm = React.memo(props => {
 
   const handleChangeUsername = useCallback(text => {
     data.current.username = text
-    const valid = (text.length >= props.minUserLen) && (text.length <= props.maxUserLen) && (!!text.match(/^[0-9a-zA-Z]+$/))
+    const valid = (!!text.match(props.allowUser))
     setValidUser(valid)
-  }, [props.minUserLen, props.maxUserLen])
+  }, [props.allowUser])
 
   const handleChangePassword = useCallback(text => {
     data.current.password = text
-    const valid = (text.length >= props.minPassLen) && (text.length <= props.maxPassLen) && (!!text.match(/^[0-9a-zA-Z]+$/))
+    const valid = (!!text.match(props.allowPass))
     setValidPass(valid)
-  }, [props.minUserLen, props.maxUserLen])
+  }, [props.allowPass])
 
   const handleSubmit = useCallback(() => {
     if (props.onSubmit) {
@@ -75,20 +75,16 @@ UserLoginForm.propTypes = {
   className : PropTypes.string,
   disabled  : PropTypes.bool,
   onSubmit  : PropTypes.func,
-  minUserLen: PropTypes.number,
-  maxUserLen: PropTypes.number,
-  minPassLen: PropTypes.number,
-  maxPassLen: PropTypes.number
+  allowUser : PropTypes.object,
+  allowPass : PropTypes.object
 }
 
 UserLoginForm.defaultProps = {
   className : "",
   disabled  : false,
   onSubmit  : undefined,
-  minUserLen: 4,
-  maxUserLen: 16,
-  minPassLen: 4,
-  maxPassLen: 16
+  allowUser : /^[0-9a-zA-Z]{4,16}$/,
+  allowPass : /^[0-9a-zA-Z]{4,16}$/
 }
 
 export default UserLoginForm
