@@ -18,15 +18,20 @@ const getSchema = schemaType => {
 }
 
 const validateJsonData = (jsonData, schemaType) => new Promise(resolve => {
-  jsonschema.validate(json, getSchema(schemaType), { throwError: true })
+  jsonschema.validate(jsonData, getSchema(schemaType), { throwError: true })
   return resolve(jsonData)
 })
 
-const validateJsonFile = (jsonPath, schemaType) => new Promise(resolve => {
+const validateJsonFile = (jsonPath, schemaType) => new Promise((resolve, reject) => {
   return fs.promises.readFile(jsonPath, "utf8")
   .then(data => {
-    jsonschema.validate( JSON.parse(data), getSchema(schemaType), { throwError: true })
-    return resolve(json)
+    const jsonData = JSON.parse(data)
+    jsonschema.validate(jsonData, getSchema(schemaType), { throwError: true })
+    return resolve(jsonData)
+  })
+  .catch(err => {
+    console.log(err)
+    return reject(err)
   })
 })
 
