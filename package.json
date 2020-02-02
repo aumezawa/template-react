@@ -1,6 +1,6 @@
 {
   "name": "template-react",
-  "version": "1.5.8",
+  "version": "1.6.0",
   "description": "Template of a project with react",
   "storage": "../data",
   "scripts": {
@@ -27,6 +27,7 @@
     "cookie-parser": "^1.4.4",
     "express": "^4.17.1",
     "express-session": "^1.17.0",
+    "helmet": "^3.21.2",
     "http-errors": "^1.7.3",
     "jquery": "^3.4.1",
     "jsonschema": "^1.2.5",

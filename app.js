@@ -2,6 +2,7 @@ import express from "express"
 import cookieParser from "cookie-parser"
 import bodyParser from "body-parser"
 import fs from "fs"
+import helmet from "helmet"
 import logger from "morgan"
 import passport from "passport"
 import passportLocal from "passport-local"
@@ -20,6 +21,7 @@ app.use(logger("dev"));
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(cookieParser())
+app.use(helmet())
 
 app.use(session({ secret: project.name }))
 app.use(passport.initialize())
