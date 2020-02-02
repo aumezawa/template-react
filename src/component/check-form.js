@@ -1,7 +1,7 @@
 import React, { useCallback } from "react"
 import PropTypes from "prop-types"
 
-const CheckForm = React.memo(props => {
+const CheckForm = React.memo(React.forwardRef((props, ref) => {
   const handleChange = useCallback(e => {
     if (props.onChange) {
       props.onChange(e.target.checked)
@@ -13,7 +13,7 @@ const CheckForm = React.memo(props => {
       <div className="input-group">
         <div className="input-group-prepend">
           <div className="input-group-text">
-            <input type="checkbox" defaultChecked={ props.dafault } onChange={ handleChange } />
+            <input ref={ ref } type="checkbox" disabled={ props.disabled } defaultChecked={ props.dafault } onChange={ handleChange } />
           </div>
         </div>
         <div className="input-group-append">
@@ -22,7 +22,7 @@ const CheckForm = React.memo(props => {
       </div>
     </div>
   )
-})
+}))
 
 CheckForm.propTypes = {
   className : PropTypes.string,

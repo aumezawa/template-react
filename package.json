@@ -1,6 +1,6 @@
 {
   "name": "template-react",
-  "version": "1.5.7",
+  "version": "1.5.8",
   "description": "Template of a project with react",
   "storage": "../data",
   "scripts": {

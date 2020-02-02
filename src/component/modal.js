@@ -15,8 +15,10 @@ const Modal = props => {
       <div className={ `modal-dialog modal-dialog-centered modal-dialog-scrollable ${ props.size }` } role="document">
         <div className="modal-content">
           <div className="modal-header">
-            <h5 className="modal-title" id={ id.current.label }>{ props.title }</h5>
-            <p className={ `${ display }` }>{ props.message }</p>
+            <div className="modal-title" id={ id.current.label }>
+              <p className="h5">{ props.title }</p>
+              <p className={ `h6 text-monospace text-wrap text-break ${ display }` }>{ props.message }</p>
+            </div>
             <button className="close" type="button" data-dismiss="modal" aria-label="Close">
               <span aria-hidden="true">&times;</span>
             </button>

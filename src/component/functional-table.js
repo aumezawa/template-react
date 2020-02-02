@@ -8,6 +8,7 @@ import Modal from "./modal.js"
 import Pagination from "../component/pagination.js"
 import TextFilterForm, { MODE_INCLUDED, MODE_NOT_INCLUDED, MODE_REGEX } from "./text-filter-form.js"
 
+import escape from "../lib/escape.js"
 import uniqueId from "../lib/uniqueId.js"
 
 const FunctionalTable = React.memo(props => {
@@ -20,6 +21,7 @@ const FunctionalTable = React.memo(props => {
   const rows      = useRef(0)
   const line      = useRef(0)
   const comments  = useRef([])
+  const message   = useRef("")
 
   const id = useRef({
     text    : "modal-" + uniqueId(),
@@ -69,7 +71,7 @@ const FunctionalTable = React.memo(props => {
     setPage(page)
   }, [true])
 
-  const handleClickFilterComment = useCallback(() => {
+  const handleClickCommentFilter = useCallback(() => {
     filter.current["#"] = !filter.current["#"]
     forceUpdate()
   }, [true])
@@ -77,6 +79,7 @@ const FunctionalTable = React.memo(props => {
   const handleClickComment = useCallback(e => {
     line.current = Number(e.target.title)
     comments.current = (`${ line.current }` in props.comments) ? props.comments[`${ line.current }`] : []
+    message.current = props.table.format.labels.map(label => props.table.data[line.current - 1][label.name]).join(", ")
     forceUpdate()
   }, [props.comments])
 
@@ -124,7 +127,7 @@ const FunctionalTable = React.memo(props => {
               <EmbeddedButton
                 label="#"
                 on={ filter.current["#"] }
-                onClick={ handleClickFilterComment }
+                onClick={ handleClickCommentFilter }
               />
             </th>
           )
@@ -143,8 +146,8 @@ const FunctionalTable = React.memo(props => {
       const data = props.table.data
       return data.map((datum, index) => {
         let line = index + 1
-        if (!format.labels.reduce((acc, label) => {
-          return acc && isFiltered(label.name, datum[label.name]) && isFilteredByComment(line)
+        if (!isFilteredByComment(line) || !format.labels.reduce((acc, label) => {
+          return acc && isFiltered(label.name, datum[label.name])
         }, true)) { return }
 
         rows.current++
@@ -158,7 +161,7 @@ const FunctionalTable = React.memo(props => {
         }
         row = row.concat(format.labels.map(label => {
           let wrapping = (label.name === format.contentKey) ? "text-wrap text-break" : "text-nowrap"
-          return <td key={ label.name + line } className={ `${ wrapping }` }>{ datum[label.name] }</td>
+          return <td key={ label.name + line } className={ `${ wrapping }` }>{ highlight(label.name, datum[label.name]) }</td>
         }))
         if (props.comments) {
           row.push(<td key={ "comment" + line } scope="col">
@@ -173,25 +176,42 @@ const FunctionalTable = React.memo(props => {
     }
   }
 
-  const isFiltered = (key, datum) => {
-    if (!(key in filter.current)) {
+  const isFiltered = (label, datum) => {
+    if (!(label in filter.current)) {
       return true
     }
 
-    switch (filter.current[key].type) {
+    switch (filter.current[label].type) {
       case "text":
-        switch (filter.current[key].mode) {
-          case MODE_INCLUDED:     return  datum.includes(filter.current[key].text) ? true : false
-          case MODE_NOT_INCLUDED: return !datum.includes(filter.current[key].text) ? true : false
-          case MODE_REGEX:        return ((new RegExp(filter.current[key].text)).exec(datum) !== null) ? true : false
-          default:                return false
+        switch (filter.current[label].mode) {
+          case MODE_INCLUDED:
+            if (filter.current[label].case) {
+              return datum.includes(filter.current[label].text) ? true : false
+            } else {
+              return datum.toUpperCase().includes(filter.current[label].text.toUpperCase()) ? true : false
+            }
+
+          case MODE_NOT_INCLUDED:
+            if (filter.current[label].case) {
+              return !datum.includes(filter.current[label].text) ? true : false
+            } else {
+              return !datum.toUpperCase().includes(filter.current[label].text.toUpperCase()) ? true : false
+            }
+
+          case MODE_REGEX:
+            const option = filter.current[label].case ? "g" : "gi"
+            const regex = new RegExp(filter.current[label].text, option)
+            return !!datum.match(regex)
+
+          default:
+            return false
         }
 
       case "date":
         let at = new Date(datum)
-        if (at.toString() === "Invalid Date")                                       { return false }
-        if (filter.current[key].enable.from && filter.current[key].date.from > at)  { return false }
-        if (filter.current[key].enable.to   && filter.current[key].date.to   < at)  { return false }
+        if (at.toString() === "Invalid Date")                                           { return false }
+        if (filter.current[label].enable.from && filter.current[label].date.from > at)  { return false }
+        if (filter.current[label].enable.to   && filter.current[label].date.to   < at)  { return false }
         return true
 
       default:
@@ -200,6 +220,35 @@ const FunctionalTable = React.memo(props => {
   }
 
   const isFilteredByComment = line => ((!filter.current["#"] || `${ line }` in props.comments) ? true : false)
+
+  const highlight = (label, datum) => {
+    if (!(label in filter.current)) {
+      return datum
+    }
+
+    switch (filter.current[label].type) {
+      case "text":
+        let condition = filter.current[label].text
+        let option = filter.current[label].case ? "g" : "gi"
+        switch (filter.current[label].mode) {
+          case MODE_INCLUDED:
+            condition = escape.regex(condition)
+          case MODE_REGEX:
+            const regex = new RegExp("(" + condition + ")", option)
+            return (
+              <>
+                { datum.split(regex).map((text, index) => (index % 2 === 0) ? text : <span key={ index } className="bg-warning font-weight-bold">{ text }</span>) }
+              </>
+            )
+
+          default:
+            return datum
+        }
+
+      default:
+        return datum
+    }
+  }
 
   return (
     <div className={ props.className }>
@@ -228,7 +277,8 @@ const FunctionalTable = React.memo(props => {
       <CommentEditorModal
         id={ id.current.comment }
         formId={ props.formId }
-        title={ `New/View comment, line: ${ line.current } ( ${ comments.current.length } comments ) ` }
+        title={ `Edit/View comments, line: ${ line.current } ( ${ comments.current.length } comments )` }
+        message={ message.current }
         user={ props.user }
         comments={ comments.current }
         onSubmit={ handleSubmitComment }
