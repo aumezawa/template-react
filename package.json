@@ -1,7 +1,10 @@
 {
   "name": "template-react",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "description": "Template of a project with react",
+  "http_port": 80,
+  "https_port": 443,
+  "http_enable": false,
   "storage": "../data",
   "scripts": {
     "build": "webpack",

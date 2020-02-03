@@ -14,16 +14,30 @@ var path = require('path');
 var terminal = require('../routes/terminal.js');
 
 /**
- * Get port from environment and store in Express.
+ * Get configuration from Express.
  */
 
-var http_port = normalizePort(process.env.HTTP_PORT || '3000');
-var https_port = normalizePort(process.env.HTTPS_PORT || '3443');
-app.set('http_port', http_port);
-app.set('https_port', https_port);
+var http_port = app.get('http_port');
+var https_port = app.get('https_port');
+var http_enable = app.get('http_enable')
 
 /**
- * Create HTTP/HTTPS server.
+ * Create HTTP server.
+ */
+
+var http_server = undefined;
+if (http_enable) {
+  http_server = http.createServer(app);
+} else {
+  var http_app = express();
+  http_app.all('*', function(req, res) {
+    res.redirect('https://' + req.hostname + ':' + https_port + req.url)
+  });
+  http_server = http.createServer(http_app);
+}
+
+/**
+ * Create HTTPS server.
  */
 
 var https_key = fs.readFileSync(path.join(__dirname, '../auth/server-key.pem'));
@@ -32,10 +46,6 @@ var https_opts = {
   key : https_key,
   cert: https_cert
 };
-
-var http_server = http.createServer((express()).all('*', function (request, response) {
-  response.redirect(`https://${ request.hostname }:${ https_port }${ request.url }`);
-}));
 var https_server = https.createServer(https_opts, app);
 
 /**
@@ -43,57 +53,57 @@ var https_server = https.createServer(https_opts, app);
  */
 
 http_server.listen(http_port);
+http_server.on('error', onErrorHttp);
+http_server.on('listening', onListeningHttp);
+
 https_server.listen(https_port);
-https_server.on('error', onError);
-https_server.on('listening', onListening);
+https_server.on('error', onErrorHttps);
+https_server.on('listening', onListeningHttps);
 
 /**
- * Terminal
+ * Connect to Terminal
  */
 
+terminal(http_server);
 terminal(https_server);
 
 /**
- * Normalize a port into a number, string, or false.
+ * Event listener for HTTP/HTTPS server "error" event.
  */
 
-function normalizePort(val) {
-  var port = parseInt(val, 10);
-
-  if (isNaN(port)) {
-    // named pipe
-    return val;
-  }
-
-  if (port >= 0) {
-    // port number
-    return port;
-  }
-
-  return false;
-}
-
-/**
- * Event listener for HTTP server "error" event.
- */
-
-function onError(error) {
+function onErrorHttp(error) {
   if (error.syscall !== 'listen') {
     throw error;
   }
 
-  var bind = typeof https_port === 'string'
-    ? 'Pipe ' + https_port
-    : 'Port ' + https_port;
+  // handle specific listen errors with friendly messages
+  switch (error.code) {
+    case 'EACCES':
+      console.error('port ' + http_port + ' requires elevated privileges');
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      console.error('port ' + http_port + ' is already in use');
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+}
+
+function onErrorHttps(error) {
+  if (error.syscall !== 'listen') {
+    throw error;
+  }
 
   // handle specific listen errors with friendly messages
   switch (error.code) {
     case 'EACCES':
-      console.error(bind + ' requires elevated privileges');
+      console.error('port ' + https_port + ' requires elevated privileges');
       process.exit(1);
       break;
     case 'EADDRINUSE':
-      console.error(bind + ' is already in use');
+      console.error('port ' + https_port + ' is already in use');
       process.exit(1);
       break;
     default:
@@ -102,13 +112,15 @@ function onError(error) {
 }
 
 /**
- * Event listener for HTTPS server "listening" event.
+ * Event listener for HTTP/HTTPS server "listening" event.
  */
 
-function onListening() {
+function onListeningHttp() {
+  var addr = http_server.address();
+  console.log('HTTP server is listening on port ' + addr.port);
+}
+
+function onListeningHttps() {
   var addr = https_server.address();
-  var bind = typeof addr === 'string'
-    ? 'pipe ' + addr
-    : 'port ' + addr.port;
-  debug('Listening on ' + bind);
+  console.log('HTTPS server is listening on port ' + addr.port);
 }
