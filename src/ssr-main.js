@@ -13,7 +13,13 @@ const SsrMain = React.memo(props => (
     </head>
 
     <body>
-      <div id="csr-main" project={ props.project } page={ props.page } user={ props.user } />
+      <div id="csr-main" project={ props.project } page={ props.page } user={ props.user }>
+        <div id="unsupported-message" className="text-center" style={ { "color": "white" } }>
+          <p>This page works with React library.</p>
+          <p>If this page won't change, you may be using an unsupported browser.</p>
+          <p>Please re-access with Chrome or Firefox. Thank you.</p>
+        </div>
+      </div>
       <script src={ props.script }></script>
     </body>
   </html>

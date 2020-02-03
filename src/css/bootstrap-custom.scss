@@ -1,5 +1,10 @@
 @import "~bootstrap/scss/bootstrap";
 
+// for Top Page
+#unsupported-message {
+  color: red !important;
+}
+
 // for Header-Fixed Table
 .table-fixed thead th {
   position: -webkit-sticky;
