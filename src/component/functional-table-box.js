@@ -91,6 +91,7 @@ const FunctionalTableBox = React.memo(props => {
       <AutoReloader
         path={ props.path + ".cmt" }
         type="file"
+        disabled={ props.path === "" }
         onChange={ handleChange }
       />
       <FunctionalTable

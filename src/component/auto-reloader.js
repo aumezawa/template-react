@@ -47,9 +47,11 @@ const AutoReloader = React.memo(props => {
 
   useEffect(() => {
     clearTimeout(timer.current)
-    timer.current = setInterval(monitorChange, props.interval * 1000)
+    if (!props.disabled) {
+      timer.current = setInterval(monitorChange, props.interval * 1000)
+    }
     return () => clearTimeout(timer.current)
-  }, [props.path])
+  }, [props.path, props.disabled])
 
   const handleChange = () => {
     if (props.onChange) {
@@ -63,6 +65,7 @@ AutoReloader.propTypes = {
   path    : PropTypes.string,
   type    : PropTypes.string,
   interval: PropTypes.number,
+  disabled: PropTypes.bool,
   onChange: PropTypes.func
 }
 
@@ -70,6 +73,7 @@ AutoReloader.defaultProps = {
   path    : "",
   type    : "",
   interval: 10,
+  disabled: true,
   onChange: undefined
 }
 
