@@ -47,7 +47,7 @@ router.get("*", Auth.isAuthenticated, (req, res, next) => {
                 file: false,
                 children: fs.readdirSync(node).map(name => ls(path.join(node, name))).filter(x => x)
               })
-            } else if (!(node.includes(".cmt"))) {
+            } else if (!node.includes(".cmt") && !node.includes(".vft")) {
               return ({
                 name: path.basename(node),
                 file: true
@@ -62,6 +62,15 @@ router.get("*", Auth.isAuthenticated, (req, res, next) => {
         } catch {
           return res.json({ success: false })
         }
+        break
+
+      case "vft":
+        return jsonValidator.validateJsonFile(reqPath + ".vft", "file-tree")
+        .then(data => res.json({
+          success : true,
+          ls      : data
+        }))
+        .catch(err => res.json({ success: false }))
         break
 
       case "mkdir":

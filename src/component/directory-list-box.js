@@ -5,7 +5,7 @@ import axios from "axios"
 import path from "path"
 
 import EmbeddedButton from "./embedded-button.js"
-import TreeLeaf from "./tree-leaf.js"
+import TreeLeaf from "./file-tree-leaf.js"
 
 const DirectoryListBox = React.memo(props => {
   const [ignored, forceUpdate] = useReducer(x => x + 1, 0)

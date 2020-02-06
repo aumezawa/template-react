@@ -17,6 +17,7 @@ const MainPage = React.memo(props => {
 
   const refs = useRef({
     case    : React.createRef(),
+    summary : React.createRef(),
     explorer: React.createRef(),
     upload  : React.createRef()
   })
@@ -26,7 +27,7 @@ const MainPage = React.memo(props => {
 
   const handleSelectDirectory = useCallback(dirPath => {
     dirpath.current = dirPath
-    refs.current.explorer.current.click()
+    refs.current.summary.current.click()
     forceUpdate()
   }, [true])
 
@@ -62,13 +63,14 @@ const MainPage = React.memo(props => {
         main={ <FunctionalTableBox path={ filepath.current } user={ props.user } /> }
         left={
           <TabFrame
-            labels={ ["Case", "Explorer", "Upload"] }
+            labels={ ["Case", "Summary", "Explorer", "Upload"] }
             items={ [
               <DirectoryListBox key={ dirId } path="/data" onSelect={ handleSelectDirectory } />,
+              <FileExplorerBox key={ dirpath.current } path={ dirpath.current } mode="vft" onSelect={ handleSelectFile } />,
               <FileExplorerBox key={ dirpath.current } path={ dirpath.current } onSelect={ handleSelectFile } />,
               <FileUploaderButton path="/data" onDone={ handleDoneFileUpload } />
             ] }
-            refs={ [refs.current.case, refs.current.explorer, refs.current.upload] }
+            refs={ [refs.current.case, refs.current.summary, refs.current.explorer, refs.current.upload] }
           />
         }
       />

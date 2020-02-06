@@ -4,7 +4,7 @@ import PropTypes from "prop-types"
 import axios from "axios"
 import path from "path"
 
-import TreeNode from "./tree-node.js"
+import TreeNode from "./file-tree-node.js"
 import EmbeddedButton from "./embedded-button.js"
 
 const FileExplorerBox = React.memo(props => {
@@ -16,7 +16,8 @@ const FileExplorerBox = React.memo(props => {
     if (props.path === "") {
       return
     }
-    const uri = location.protocol + "//" + location.host + props.path + "?cmd=ls"
+    const cmd = (props.mode === "directory") ? "ls" : "vft"
+    const uri = location.protocol + "//" + location.host + props.path + "?cmd=" + cmd
     axios.get(uri)
     .then(res => {
       if (!res.data.success) {
@@ -26,9 +27,9 @@ const FileExplorerBox = React.memo(props => {
       forceUpdate()
     })
     .catch(err => {
-      alert("Could not view the directory...")
+      //alert("Could not view the directory...")
     })
-  }, [props.path])
+  }, [props.path, props.mode])
 
   const handleClickView = useCallback(e => {
     if (props.onSelect) {
@@ -58,9 +59,6 @@ const FileExplorerBox = React.memo(props => {
     <div className={ props.className }>
       <TreeNode
         source={ ls.current }
-        isName={ node => node.name }
-        isLeaf={ node => node.file }
-        isChild={ node => node.children }
         path={ props.path }
         buttons={ [
           <EmbeddedButton
@@ -86,12 +84,14 @@ const FileExplorerBox = React.memo(props => {
 FileExplorerBox.propTypes = {
   className : PropTypes.string,
   path      : PropTypes.string,
+  mode      : PropTypes.string,
   onSelect  : PropTypes.func
 }
 
 FileExplorerBox.defaultProps = {
   className : "",
   path      : "",
+  mode      : "directory",
   onSelect  : undefined
 }
 

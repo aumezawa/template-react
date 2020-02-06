@@ -7,13 +7,19 @@
       "type": "object",
       "properties": {
         "name": {
-          "type": "string"
+          "type": "string",
+          "pattern": "^[^\\\/:*?\"<>|]+$"
         },
         "file": {
           "type": "boolean"
         },
         "link": {
-          "type": "string"
+          "type": "string",
+          "pattern": "^[^\\:*?\"<>|]+$"
+        },
+        "type": {
+          "type": "string",
+          "pattern": "^(bin|dmp)$"
         }
       },
       "additionalProperties": false,
@@ -23,7 +29,8 @@
       "type": "object",
       "properties": {
         "name": {
-          "type": "string"
+          "type": "string",
+          "pattern": "^[^\\\/:*?\"<>|]+$"
         },
         "file": {
           "type": "boolean"

@@ -1,7 +1,9 @@
 import React, { useState, useRef, useCallback } from "react"
 import PropTypes from "prop-types"
 
-import TreeLeaf from "./tree-leaf.js"
+import path from "path"
+
+import TreeLeaf from "./file-tree-leaf.js"
 
 import uniqueId from "../lib/uniqueId.js"
 
@@ -18,14 +20,16 @@ const TreeNode = props => {
 
   const renderChildren = () => {
     try {
-      return props.isChild(props.source).map(child => {
-        let nodepath = props.path + "/" + props.isName(child)
-        if (props.isLeaf(child)) {
+      return props.source.children.map(child => {
+        let root = (props.root !== "") ? props.root : props.path
+        let nodepath = props.path + "/" + child.name
+        if (child.file) {
+          nodepath = ("link" in child) ? path.join(root, child.link) : nodepath
           return (
             <TreeLeaf
               key={ nodepath }
               path={ nodepath }
-              label={ props.isName(child) }
+              label={ child.name }
               buttons={ props.buttons }
               depth={ props.depth + 1 }
             />
@@ -35,9 +39,7 @@ const TreeNode = props => {
             <TreeNode
               key={ nodepath }
               source={ child }
-              isName={ props.isName }
-              isLeaf={ props.isLeaf }
-              isChild={ props.isChild }
+              root={ root }
               path={ nodepath }
               buttons={ props.buttons }
               depth={ props.depth + 1 }
@@ -61,7 +63,7 @@ const TreeNode = props => {
         aria-controls={ id.current.collapse }
         onClick={ handleClickNode }
       >
-        { "-".repeat(props.depth) } { open ? "[-]" : "[+]" } { props.source && props.isName(props.source) }
+        { "-".repeat(props.depth) } { open ? "[-]" : "[+]" } { props.source && props.source.name }
       </button>
       <ul className="list-group collapse" id={ id.current.collapse }>
         { renderChildren() }
@@ -72,9 +74,7 @@ const TreeNode = props => {
 
 TreeNode.propTypes = {
   source  : PropTypes.object,
-  isName  : PropTypes.func.isRequired,
-  isLeaf  : PropTypes.func.isRequired,
-  isChild : PropTypes.func.isRequired,
+  root    : PropTypes.string,
   path    : PropTypes.string,
   buttons : PropTypes.array,
   depth   : PropTypes.number
@@ -82,9 +82,7 @@ TreeNode.propTypes = {
 
 TreeNode.defaultProps = {
   source  : undefined,
-  isName  : undefined,
-  isLeaf  : undefined,
-  isChild : undefined,
+  root    : "",
   path    : "",
   buttons : [],
   depth   : 0
