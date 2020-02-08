@@ -4,7 +4,7 @@ import PropTypes from "prop-types"
 import axios from "axios"
 import path from "path"
 
-import EmbeddedButton from "./embedded-button.js"
+import DropdownItem from "./dropdown-item.js"
 import TreeLeaf from "./file-tree-leaf.js"
 
 const DirectoryListBox = React.memo(props => {
@@ -48,12 +48,10 @@ const DirectoryListBox = React.memo(props => {
             key={ nodepath }
             path={ nodepath }
             label={ child.name }
-            buttons={ [
-              <EmbeddedButton
+            items={ [
+              <DropdownItem
                 key="open"
                 label="open"
-                title="open"
-                on={ true }
                 onClick={ handleSelect }
               />
             ] }

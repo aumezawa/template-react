@@ -30,7 +30,7 @@ const TreeNode = props => {
               key={ nodepath }
               path={ nodepath }
               label={ child.name }
-              buttons={ props.buttons }
+              items={ props.items }
               depth={ props.depth + 1 }
             />
           )
@@ -41,7 +41,7 @@ const TreeNode = props => {
               source={ child }
               root={ root }
               path={ nodepath }
-              buttons={ props.buttons }
+              items={ props.items }
               depth={ props.depth + 1 }
             />
           )
@@ -55,7 +55,7 @@ const TreeNode = props => {
   return (
     <ul className="list-group text-left text-monospace">
       <button
-        className="list-group-item list-group-item-action list-group-item-info rounded-0 py-2"
+        className="d-flex flex-row list-group-item list-group-item-action list-group-item-info rounded-0 py-0 px-0"
         type="button"
         data-toggle="collapse"
         data-target={ "#" + id.current.collapse }
@@ -63,7 +63,15 @@ const TreeNode = props => {
         aria-controls={ id.current.collapse }
         onClick={ handleClickNode }
       >
-        { "-".repeat(props.depth) } { open ? "[-]" : "[+]" } { props.source && props.source.name }
+      <div className="my-2 ml-3 mr-1">
+        { "-".repeat(props.depth) }
+      </div>
+      <div className="my-2 mr-1">
+        { open ? "[-]" : "[+]" }
+      </div>
+      <div className="flex-grow-1 my-2 mr-3">
+        { props.source && props.source.name }
+      </div>
       </button>
       <ul className="list-group collapse" id={ id.current.collapse }>
         { renderChildren() }
@@ -76,7 +84,7 @@ TreeNode.propTypes = {
   source  : PropTypes.object,
   root    : PropTypes.string,
   path    : PropTypes.string,
-  buttons : PropTypes.array,
+  items   : PropTypes.array,
   depth   : PropTypes.number
 }
 
@@ -84,7 +92,7 @@ TreeNode.defaultProps = {
   source  : undefined,
   root    : "",
   path    : "",
-  buttons : [],
+  items   : [],
   depth   : 0
 }
 

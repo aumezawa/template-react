@@ -1,6 +1,6 @@
 {
   "name": "template-react",
-  "version": "1.6.4",
+  "version": "1.6.5",
   "description": "Template of a project with react",
   "http_port": 80,
   "https_port": 443,
@@ -10,8 +10,8 @@
     "build": "webpack",
     "debug": "./node_modules/.bin/babel-node ./bin/www --noAuth",
     "init": "./node_modules/.bin/babel-node ./auth/initDatabase.js",
-    "jsonv": "./node_modules/.bin/babel-node ./src/schema/jsonValidator.js",
     "INIT": "./node_modules/.bin/babel-node ./auth/initDatabase.js --override",
+    "jsonv": "./node_modules/.bin/babel-node ./src/schema/jsonValidator.js",
     "start": "./node_modules/.bin/babel-node ./bin/www",
     "test": "echo \"Error: no test specified\" && exit 1",
     "win-tool": "npm install --global --production windows-build-tools"

@@ -4,8 +4,8 @@ import PropTypes from "prop-types"
 import axios from "axios"
 import path from "path"
 
+import DropdownItem from "./dropdown-item.js"
 import TreeNode from "./file-tree-node.js"
-import EmbeddedButton from "./embedded-button.js"
 
 const FileExplorerBox = React.memo(props => {
   const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
@@ -60,19 +60,15 @@ const FileExplorerBox = React.memo(props => {
       <TreeNode
         source={ ls.current }
         path={ props.path }
-        buttons={ [
-          <EmbeddedButton
+        items={ [
+          <DropdownItem
             key="view"
             label="view"
-            title="view"
-            on={ true }
             onClick={ handleClickView }
           />,
-          <EmbeddedButton
+          <DropdownItem
             key="download"
-            label="DL"
-            title="download"
-            on={ true }
+            label="download"
             onClick={ handleClickDownload }
           />
         ] }
