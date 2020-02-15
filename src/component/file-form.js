@@ -6,7 +6,8 @@ import path from "path"
 import uniqueId from "../lib/uniqueId.js"
 
 const FileForm = React.memo(React.forwardRef((props, ref) => {
-  const valid = (props.valid) ? "" : "is-invalid"
+  const valid   = (props.valid) ? "" : "is-invalid"
+  const display = (props.hidden) ? "d-none" : ""
 
   const id = useRef({
     form: uniqueId()
@@ -22,7 +23,7 @@ const FileForm = React.memo(React.forwardRef((props, ref) => {
   }, [props.onChange])
 
   return (
-    <div className={ props.className }>
+    <div className={ `${ props.className} ${ display }` }>
       <div className="input-group">
         <div className="input-group-prepend">
           <span className="input-group-text">{ props.label }</span>
@@ -49,6 +50,7 @@ FileForm.propTypes = {
   label     : PropTypes.string,
   filename  : PropTypes.string,
   disabled  : PropTypes.bool,
+  hidden    : PropTypes.bool,
   onChange  : PropTypes.func
 }
 
@@ -58,6 +60,7 @@ FileForm.defaultProps = {
   label     : "File",
   filename  : "",
   disabled  : false,
+  hidden    : false,
   onChange  : undefined
 }
 

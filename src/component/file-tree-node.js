@@ -1,8 +1,6 @@
 import React, { useState, useRef, useCallback } from "react"
 import PropTypes from "prop-types"
 
-import path from "path"
-
 import TreeLeaf from "./file-tree-leaf.js"
 
 import uniqueId from "../lib/uniqueId.js"
@@ -24,7 +22,7 @@ const TreeNode = props => {
         let root = (props.root !== "") ? props.root : props.path
         let nodepath = props.path + "/" + child.name
         if (child.file) {
-          nodepath = ("link" in child) ? path.join(root, child.link) : nodepath
+          nodepath = ("link" in child) ? (root + "/" + child.link) : nodepath
           return (
             <TreeLeaf
               key={ nodepath }

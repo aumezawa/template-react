@@ -1,8 +1,7 @@
-import React, { useState, useRef, useCallback, useReducer } from "react"
+import React, { useState, useRef, useEffect, useCallback, useReducer } from "react"
 import PropTypes from "prop-types"
 
 import axios from "axios"
-import path from "path"
 
 import FileUploadForm from "./file-upload-form.js"
 import MessageCard from "./message-card.js"
@@ -18,12 +17,18 @@ const FileUploaderBox = React.memo(props => {
 
   const [formId,    clearForm]    = useReducer(x => x + 1, 0)
 
-  const message = useRef(`Please choose a upload file and input a store directory.`)
+  useEffect(() => {
+    message.current = (props.directory) ? "Please choose a upload file and input a store directory." : "Please choose a upload file."
+    setDone(false)
+    clearForm()
+  }, [props.path])
+
+  const message = useRef("")
   const color   = done ? (success ? "success" : "failure") : "normal"
 
   const handleSubmit = useCallback(data => {
-    let uri = path.join(props.path, data.directory)
-    let params = new FormData()
+    const uri = props.path + "/" + data.directory
+    const params = new FormData()
     params.append("file", data.fileobj)
 
     setDone(false)
@@ -52,7 +57,7 @@ const FileUploaderBox = React.memo(props => {
       setSuccess(false)
     })
     .then(() => {
-      return sleep(props.interval)
+      sleep(props.interval)
     })
     .then(() => {
       clearForm()
@@ -66,12 +71,13 @@ const FileUploaderBox = React.memo(props => {
       <MessageCard
         className="my-0"
         message={ message.current }
-        type={ `${ color }` }
+        type={ color }
       />
       <ProgressBar progress={ progress } />
       <FileUploadForm
         key={ formId }
         disabled={ uploading }
+        directory={ props.directory }
         onSubmit={ handleSubmit }
       />
     </div>
@@ -79,15 +85,17 @@ const FileUploaderBox = React.memo(props => {
 })
 
 FileUploaderBox.propTypes = {
-  path      : PropTypes.string.isRequired,
   className : PropTypes.string,
+  path      : PropTypes.string.isRequired,
+  directory : PropTypes.bool,
   interval  : PropTypes.number,
   onDone    : PropTypes.func
 }
 
 FileUploaderBox.defaultProps = {
-  path      : undefined,
   className : "",
+  path      : undefined,
+  directory : true,
   interval  : 3,
   onDone    : undefined
 }

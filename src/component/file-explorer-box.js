@@ -31,14 +31,14 @@ const FileExplorerBox = React.memo(props => {
     })
   }, [props.path, props.mode])
 
-  const handleClickView = useCallback(e => {
+  const handleClickView = useCallback(data => {
     if (props.onSelect) {
-      props.onSelect(e.target.parentNode.title)
+      props.onSelect(data.parent)
     }
   }, [props.onSelect])
 
-  const handleClickDownload = useCallback(e => {
-    const filepath = e.target.parentNode.title
+  const handleClickDownload = useCallback(data => {
+    const filepath = data.parent
     const uri = location.protocol + "//" + location.host + filepath
     axios.get(uri, {
       responseType: "blob"

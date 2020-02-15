@@ -6,11 +6,11 @@ import FileForm from "./file-form.js"
 import TextForm from "./text-form.js"
 
 const FileUploadForm = React.memo(props => {
-  const [validText, setValidText] = useState(true)
+  const [validDir , setValidDir]  = useState(true)
   const [validFile, setValidFile] = useState(false)
 
   const refs = useRef({
-    text: React.createRef(),
+    dir : React.createRef(),
     file: React.createRef()
   })
 
@@ -20,10 +20,10 @@ const FileUploadForm = React.memo(props => {
     fileobj   : undefined
   })
 
-  const handleChangeText = useCallback(text => {
+  const handleChangeDir = useCallback(text => {
     data.current.directory = text
     const valid = !!text.match(/^[0-9a-zA-Z_/]*$/)
-    setValidText(valid)
+    setValidDir(valid)
   }, [true])
 
   const handleChangeFile = useCallback(file => {
@@ -39,7 +39,7 @@ const FileUploadForm = React.memo(props => {
   }, [props.onSubmit])
 
   const handleCancel = useCallback(() => {
-    data.current.directory  = refs.current.text.current.value = ""
+    data.current.directory  = refs.current.dir.current.value  = ""
     data.current.filename   = refs.current.file.current.value = ""
     data.current.fileobj    = undefined
     setValidFile(false)
@@ -51,11 +51,12 @@ const FileUploadForm = React.memo(props => {
   return (
     <div className={ props.className }>
       <TextForm
-        ref={ refs.current.text }
-        valid={ validText }
-        label="Directory"
+        ref={ refs.current.dir }
+        valid={ validDir }
+        label={ props.dirLabel }
         disabled={ props.disabled }
-        onChange={ handleChangeText }
+        hidden={ !props.directory }
+        onChange={ handleChangeDir }
       />
       <FileForm
         ref={ refs.current.file }
@@ -65,9 +66,9 @@ const FileUploadForm = React.memo(props => {
         onChange={ handleChangeFile }
       />
       <ButtonSet
-        submit="Upload"
-        cancel="Cancel"
-        disabled={ !validFile }
+        submit={ props.submitLabel }
+        cancel={ props.cancelLabel }
+        disabled={ !validFile || !validDir }
         onSubmit={ handleSubmit }
         onCancel={ handleCancel }
       />
@@ -76,17 +77,25 @@ const FileUploadForm = React.memo(props => {
 })
 
 FileUploadForm.propTypes = {
-  className : PropTypes.string,
-  disabled  : PropTypes.bool,
-  onSubmit  : PropTypes.func,
-  onCancel  : PropTypes.func
+  className   : PropTypes.string,
+  submitLabel : PropTypes.string,
+  cancelLabel : PropTypes.string,
+  dirLabel    : PropTypes.string,
+  disabled    : PropTypes.bool,
+  directory   : PropTypes.bool,
+  onSubmit    : PropTypes.func,
+  onCancel    : PropTypes.func
 }
 
 FileUploadForm.defaultProps = {
-  className : "",
-  disabled  : false,
-  onSubmit  : undefined,
-  onCancel  : undefined
+  className   : "",
+  submitLabel : "Upload",
+  cancelLabel : "Cancel",
+  dirLabel    : "Directory",
+  disabled    : false,
+  directory   : true,
+  onSubmit    : undefined,
+  onCancel    : undefined
 }
 
 export default FileUploadForm

@@ -5,15 +5,21 @@ const DropdownItem = props => {
 
   const handleClickItem = useCallback(e => {
     if (props.onClick) {
-      props.onClick(e)
+      props.onClick({
+        parent: e.target.parentNode.title,
+        target: e.target.title
+      })
     }
   }, [props.onClick])
 
   return (
     <button
-      className="dropdown-item"
+      className={ `${ props.className } dropdown-item text-monospace` }
       type="button"
+      title={ props.title }
       disabled={ props.disabled }
+      data-toggle={ props.toggle }
+      data-target={ "#" + props.target }
       onClick={ handleClickItem }
     >
       { props.label }
@@ -22,15 +28,23 @@ const DropdownItem = props => {
 }
 
 DropdownItem.propTypes = {
-  label   : PropTypes.string,
-  disabled: PropTypes.bool,
-  onClick : PropTypes.func
+  className : PropTypes.string,
+  label     : PropTypes.string,
+  title     : PropTypes.string,
+  disabled  : PropTypes.bool,
+  toggle    : PropTypes.string,
+  target    : PropTypes.string,
+  onClick   : PropTypes.func
 }
 
 DropdownItem.defaultProps = {
-  label   : "action",
-  disabled: false,
-  onClick : undefined
+  className : "",
+  label     : "action",
+  title     : "",
+  disabled  : false,
+  toggle    : "",
+  target    : "",
+  onClick   : undefined
 }
 
 export default DropdownItem

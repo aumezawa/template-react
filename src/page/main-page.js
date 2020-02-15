@@ -1,9 +1,8 @@
 import React, { useRef, useCallback, useReducer } from "react"
 import PropTypes from "prop-types"
 
-import DirectoryListBox from "../component/directory-list-box.js"
+import ProjectExplorerBox from "../component/project-explorer-box.js"
 import FileExplorerBox from "../component/file-explorer-box.js"
-import FileUploaderButton from "../component/file-uploader-button.js"
 import FunctionalTableBox from "../component/functional-table-box.js"
 import MainFrame from "../component/main-frame.js"
 import NavigatorBar from "../component/navigator-bar.js"
@@ -16,17 +15,16 @@ const MainPage = React.memo(props => {
   const [dirId,   reloadDir]    = useReducer(x => x + 1, 0)
 
   const refs = useRef({
-    case    : React.createRef(),
+    project : React.createRef(),
     summary : React.createRef(),
-    explorer: React.createRef(),
-    upload  : React.createRef()
+    explorer: React.createRef()
   })
 
   const dirpath   = useRef("")
   const filepath  = useRef("")
 
-  const handleSelectDirectory = useCallback(dirPath => {
-    dirpath.current = dirPath
+  const handleSelectProject = useCallback(data => {
+    dirpath.current = data.path
     refs.current.summary.current.click()
     forceUpdate()
   }, [true])
@@ -63,14 +61,13 @@ const MainPage = React.memo(props => {
         main={ <FunctionalTableBox path={ filepath.current } user={ props.user } /> }
         left={
           <TabFrame
-            labels={ ["Case", "Summary", "Explorer", "Upload"] }
+            labels={ ["Project", "Summary", "Explorer"] }
             items={ [
-              <DirectoryListBox key={ dirId } path="/data" onSelect={ handleSelectDirectory } />,
+              <ProjectExplorerBox key={ dirId } path="/data" onSelect={ handleSelectProject } />,
               <FileExplorerBox key={ dirpath.current } path={ dirpath.current } mode="vft" onSelect={ handleSelectFile } />,
               <FileExplorerBox key={ dirpath.current } path={ dirpath.current } onSelect={ handleSelectFile } />,
-              <FileUploaderButton path="/data" onDone={ handleDoneFileUpload } />
             ] }
-            refs={ [refs.current.case, refs.current.summary, refs.current.explorer, refs.current.upload] }
+            refs={ [refs.current.project, refs.current.summary, refs.current.explorer] }
           />
         }
       />
