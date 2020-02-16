@@ -7,6 +7,7 @@ import "./css/bootstrap-custom.scss"
 import MainPage from "./page/main-page.js"
 import LoginPage from "./page/login-page.js"
 import RegisterPage from "./page/register-page.js"
+import SandboxPage from "./page/sandbox-page.js"
 
 
 // render on loaded
@@ -24,6 +25,10 @@ switch (main.getAttribute("page")) {
 
   case "register":
     ReactDOM.render(<RegisterPage project={ project } user={ user } />, main)
+    break
+
+  case "sandbox":
+    ReactDOM.render(<SandboxPage project={ project } user={ user } />, main)
     break
 
   default:
