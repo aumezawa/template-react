@@ -4,6 +4,7 @@ import PropTypes from "prop-types"
 import ProjectExplorerBox from "../component/project-explorer-box.js"
 import FileExplorerBox from "../component/file-explorer-box.js"
 import FunctionalTableBox from "../component/functional-table-box.js"
+import LayerFrame from "../component/layer-frame.js"
 import MainFrame from "../component/main-frame.js"
 import NavigatorBar from "../component/navigator-bar.js"
 import NavigatorItem from "../component/navigator-item.js"
@@ -40,36 +41,35 @@ const MainPage = React.memo(props => {
 
   return (
     <div className="container-fluid">
-      <NavigatorBar
-        title={ props.project }
-        items={ [
-          <NavigatorItem
-            key="register"
-            label="Register User"
-            page="/auth/form/register"
-            disabled={ props.user !== "root" }
-          />,
-          <NavigatorItem
-            key="logout"
-            label="Logout"
-            page="/auth/form/logout"
-          />
-        ] }
-      />
-      <MainFrame
-        head={ <p className="text-center">Hello { props.user }!</p> }
-        main={ <FunctionalTableBox path={ filepath.current } user={ props.user } /> }
-        left={
-          <TabFrame
-            labels={ ["Project", "Summary", "Explorer"] }
+      <LayerFrame
+        head={
+          <NavigatorBar
+            title={ props.project }
             items={ [
-              <ProjectExplorerBox key={ dirId } path="/data" onSelect={ handleSelectProject } />,
-              <FileExplorerBox key={ dirpath.current } path={ dirpath.current } mode="vft" onSelect={ handleSelectFile } />,
-              <FileExplorerBox key={ dirpath.current } path={ dirpath.current } onSelect={ handleSelectFile } />,
+              <NavigatorItem key="register" label="Register User" page="/auth/form/register" disabled={ props.user !== "root" } />,
+              <NavigatorItem key="logout"   label="Logout"        page="/auth/form/logout"   disabled={ false } />
             ] }
-            refs={ [refs.current.project, refs.current.summary, refs.current.explorer] }
           />
         }
+        body={
+          <MainFrame
+            head={ <div className="text-center my-1">Hello { props.user }!</div> }
+            body={ <FunctionalTableBox path={ filepath.current } user={ props.user } /> }
+            left={
+              <TabFrame
+                labels={ ["Project", "Summary", "Explorer"] }
+                items={ [
+                  <ProjectExplorerBox key={ dirId } path="/data" onSelect={ handleSelectProject } />,
+                  <FileExplorerBox key={ dirpath.current } path={ dirpath.current } mode="vft" onSelect={ handleSelectFile } />,
+                  <FileExplorerBox key={ dirpath.current } path={ dirpath.current } onSelect={ handleSelectFile } />,
+                ] }
+                refs={ [refs.current.project, refs.current.summary, refs.current.explorer] }
+              />
+            }
+          />
+        }
+        foot={ <div className="text-light text-right bg-dark mt-2 py-1 px-2">Coded by { props.author }, powered by React</div> }
+        bodyOverflow={ false }
       />
     </div>
   )
@@ -77,11 +77,13 @@ const MainPage = React.memo(props => {
 
 MainPage.propTypes = {
   project : PropTypes.string,
+  author  : PropTypes.string,
   user    : PropTypes.string
 }
 
 MainPage.defaultProps = {
   project : "unaffiliated",
+  author  : "unnamed",
   user    : "anonymous"
 }
 

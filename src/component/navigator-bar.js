@@ -10,7 +10,7 @@ const NavigatorBar = React.memo(props => {
 
   return (
     <nav className="navbar navbar-dark bg-dark">
-      <p className="navbar-brand">{ props.title }</p>
+      <div className="navbar-brand">{ props.title }</div>
       <div className="dropdown">
         <button
           className="btn btn-secondary dropdown-toggle"

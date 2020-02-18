@@ -17,14 +17,14 @@ const TabItem = props => {
 }
 
 TabItem.propTypes = {
-  item    : PropTypes.element.isRequired,
+  item    : PropTypes.element,
   labelId : PropTypes.string.isRequired,
   itemId  : PropTypes.string.isRequired,
   active  : PropTypes.bool
 }
 
 TabItem.defaultProps = {
-  item    : undefined,
+  item    : <></>,
   labelId : undefined,
   itemId  : undefined,
   active  : false

@@ -23,14 +23,14 @@ const TabLabel = React.forwardRef((props, ref) => {
 })
 
 TabLabel.propTypes = {
-  label   : PropTypes.string.isRequired,
+  label   : PropTypes.string,
   labelId : PropTypes.string.isRequired,
   itemId  : PropTypes.string.isRequired,
   active  : PropTypes.bool
 }
 
 TabLabel.defaultProps = {
-  label   : undefined,
+  label   : "",
   labelId : undefined,
   itemId  : undefined,
   active  : false
