@@ -54,7 +54,7 @@ const MainPage = React.memo(props => {
         body={
           <MainFrame
             head={ <div className="text-center my-1">Hello { props.user }!</div> }
-            body={ <FunctionalTableBox path={ filepath.current } user={ props.user } /> }
+            body={ <FunctionalTableBox className="h-100" path={ filepath.current } user={ props.user } /> }
             left={
               <TabFrame
                 labels={ ["Project", "Summary", "Explorer"] }

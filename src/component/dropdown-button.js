@@ -4,14 +4,14 @@ import PropTypes from "prop-types"
 import uniqueId from "../lib/uniqueId.js"
 
 const DropdownButton = props => {
-  const shape = props.square ? "rounded-0 h-100" : ""
+  const shape = props.square ? "align-items-stretch rounded-0" : ""
 
   const id = useRef({
     drop: uniqueId()
   })
 
   return (
-    <div className={ `${ props.className } dropdown` }>
+    <div className={ `${ props.className } d-flex dropdown` }>
       <button
         className={ `btn btn-secondary dropdown-toggle ${ shape }` }
         type="button"

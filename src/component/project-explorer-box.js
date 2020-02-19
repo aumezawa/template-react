@@ -128,16 +128,15 @@ const ProjectExplorerBox = React.memo(props => {
         directory={ false }
         onDone={ undefined }
       />
-      <div className="row my-3">
+      <div className="d-flex flex-row my-3">
         <ToggleButton
-          className="col"
+          className="flex-grow-1"
           onLabel="shared"
           offLabel="local"
           defaultOn
           onClick={ handleClickMode }
         />
         <DropdownButton
-          className="col-auto"
           items={ [
             <DropdownItem
               key="New Project"
