@@ -27,7 +27,7 @@ const ProjectExplorerBox = React.memo(props => {
     if (props.path === "") {
       return
     }
-    const uri = `${ location.protocol }//${ location.host }${ props.path }/${ mode ? "shared" : props.user }?cmd=ls`
+    const uri = `${ location.protocol }//${ location.host }${ props.path }/${ mode ? "public" : props.user }?cmd=ls`
     axios.get(uri)
     .then(res => {
       if (!res.data.success) {
@@ -42,6 +42,22 @@ const ProjectExplorerBox = React.memo(props => {
   }, [props.path, props.user, mode])
 
   useEffect(loadProject, [props.path, props.user, mode])
+
+  useEffect(() => {
+    if (props.path === "") {
+      return
+    }
+    const uri = `${ location.protocol }//${ location.host }${ props.path }/${ props.user }?cmd=mkdir`
+    axios.get(uri)
+    .then(res => {
+      if (!res.data.success) {
+        throw new Error("no private directory")
+      }
+    })
+    .catch(err => {
+      alert("Could not create private directory...")
+    })
+  }, [props.path, props.user])
 
   const handleClickMode = useCallback(value => {
     setMode(value)
@@ -78,7 +94,7 @@ const ProjectExplorerBox = React.memo(props => {
   const renderList = () => {
     try {
       return ls.current.children.map(child => {
-        const nodepath = props.path + "/" +  (mode ? "shared" : props.user) + "/" + child.name
+        const nodepath = props.path + "/" +  (mode ? "public" : props.user) + "/" + child.name
         if (child.file) {
           return
         }
@@ -103,7 +119,7 @@ const ProjectExplorerBox = React.memo(props => {
               <DropdownItem
                 key="delete"
                 label="delete"
-                disabled={ props.user != "root" && props.user != "anonymous" }
+                display={ props.user == "root" }
                 onClick={ handleDelete }
               />
             ] }
@@ -119,7 +135,7 @@ const ProjectExplorerBox = React.memo(props => {
     <div className={ props.className }>
       <ProjectCreaterModal
         id={ id.current.newpro }
-        path={ props.path + "/" +  (mode ? "shared" : props.user) }
+        path={ props.path + "/" +  (mode ? "public" : props.user) }
         onDone={ loadProject }
       />
       <FileUploaderModal
@@ -128,11 +144,11 @@ const ProjectExplorerBox = React.memo(props => {
         directory={ false }
         onDone={ undefined }
       />
-      <div className="d-flex flex-row my-3">
+      <div className="d-flex flex-row border my-2">
         <ToggleButton
-          className="flex-grow-1"
-          onLabel="shared"
-          offLabel="local"
+          className="flex-grow-1 p-2"
+          onLabel="public"
+          offLabel="private"
           defaultOn
           onClick={ handleClickMode }
         />

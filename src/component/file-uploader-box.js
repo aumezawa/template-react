@@ -50,19 +50,22 @@ const FileUploaderBox = React.memo(props => {
       if (props.onDone) {
         props.onDone()
       }
+      return axios.get(uri + data.filename + "?cmd=unzip")
     })
     .catch(err => {
       message.current = `${ data.filename } could not be uploaded...`
       setDone(true)
       setSuccess(false)
+      return
     })
     .then(() => {
-      sleep(props.interval)
+      return sleep(props.interval)
     })
     .then(() => {
       clearForm()
       setUploading(false)
       setProgress(0)
+      return
     })
   }, [props.path, props.interval, props.onDone])
 

@@ -30,8 +30,8 @@ const MainPage = React.memo(props => {
     forceUpdate()
   }, [true])
 
-  const handleSelectFile = useCallback(filePath => {
-    filepath.current = filePath
+  const handleSelectFile = useCallback(data => {
+    filepath.current = data.path
     forceUpdate()
   }, [true])
 

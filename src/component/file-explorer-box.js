@@ -25,15 +25,29 @@ const FileExplorerBox = React.memo(props => {
       }
       ls.current = res.data.ls
       forceUpdate()
+      return
     })
     .catch(err => {
       //alert("Could not view the directory...")
+      return
     })
   }, [props.path, props.mode])
 
   const handleClickView = useCallback(data => {
     if (props.onSelect) {
-      props.onSelect(data.parent)
+      props.onSelect({
+        action: "view",
+        path  : data.parent
+      })
+    }
+  }, [props.onSelect])
+
+  const handleClickViewInTerminal = useCallback(data => {
+    if (props.onSelect) {
+      props.onSelect({
+        action: "viewInTerminal",
+        path  : data.parent
+      })
     }
   }, [props.onSelect])
 
@@ -55,6 +69,41 @@ const FileExplorerBox = React.memo(props => {
     })
   }, [true])
 
+  const handleClickDebugger = useCallback(data => {
+    if (props.onSelect) {
+      props.onSelect({
+        action: "debugger",
+        path  : data.parent
+      })
+    }
+  }, [true])
+
+  const isDisplayView = useCallback(data => {
+      if ("type" in data.child) {
+        if (data.child.type !== "bin" && data.child.type !== "dmp") {
+          return true
+        } else {
+          return false
+        }
+      } else {
+        return true
+      }
+  }, [true])
+
+  const isDisplayDownload = useCallback(data => true, [true])
+
+  const isDisplayDebugger = useCallback(data => {
+    if ("type" in data.child) {
+      if  (data.child.type === "dmp") {
+        return true
+      } else {
+        return false
+      }
+    } else {
+      return false
+    }
+  }, [true])
+
   return (
     <div className={ props.className }>
       <TreeNode
@@ -67,11 +116,22 @@ const FileExplorerBox = React.memo(props => {
             onClick={ handleClickView }
           />,
           <DropdownItem
+            key="viewInTerminal"
+            label="view in terminal"
+            onClick={ handleClickViewInTerminal }
+          />,
+          <DropdownItem
             key="download"
             label="download"
             onClick={ handleClickDownload }
+          />,
+          <DropdownItem
+            key="debugger"
+            label="debugger"
+            onClick={ handleClickDebugger }
           />
         ] }
+        display={ [isDisplayView, isDisplayView, isDisplayDownload, isDisplayDebugger] }
       />
     </div>
   )

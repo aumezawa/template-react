@@ -14,7 +14,7 @@ const DropdownItem = props => {
 
   return (
     <button
-      className={ `${ props.className } dropdown-item text-monospace` }
+      className={ `${ props.className } ${ props.display ? "" : "d-none" } dropdown-item text-monospace` }
       type="button"
       title={ props.title }
       disabled={ props.disabled }
@@ -32,6 +32,7 @@ DropdownItem.propTypes = {
   label     : PropTypes.string,
   title     : PropTypes.string,
   disabled  : PropTypes.bool,
+  display   : PropTypes.bool,
   toggle    : PropTypes.string,
   target    : PropTypes.string,
   onClick   : PropTypes.func
@@ -42,6 +43,7 @@ DropdownItem.defaultProps = {
   label     : "action",
   title     : "",
   disabled  : false,
+  display   : true,
   toggle    : "",
   target    : "",
   onClick   : undefined

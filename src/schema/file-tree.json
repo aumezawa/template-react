@@ -19,7 +19,7 @@
         },
         "type": {
           "type": "string",
-          "pattern": "^(bin|dmp)$"
+          "pattern": "^(txt|bin|dmp)$"
         }
       },
       "additionalProperties": false,

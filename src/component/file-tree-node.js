@@ -19,7 +19,8 @@ const TreeNode = props => {
   const renderChildren = () => {
     try {
       return props.source.children.map(child => {
-        let root = (props.root !== "") ? props.root : props.path
+        const root = (props.root !== "") ? props.root : props.path
+        const items = props.items.map((item, index) => props.display[index]({ child: child }) ? item : undefined)
         let nodepath = props.path + "/" + child.name
         if (child.file) {
           nodepath = ("link" in child) ? (root + "/" + child.link) : nodepath
@@ -28,7 +29,7 @@ const TreeNode = props => {
               key={ nodepath }
               path={ nodepath }
               label={ child.name }
-              items={ props.items }
+              items={ items }
               depth={ props.depth + 1 }
             />
           )
@@ -40,12 +41,13 @@ const TreeNode = props => {
               root={ root }
               path={ nodepath }
               items={ props.items }
+              display={ props.display }
               depth={ props.depth + 1 }
             />
           )
         }
       })
-    } catch {
+    } catch (err) {
       return <TreeLeaf label="Invalid input data..." />
     }
   }
@@ -83,6 +85,7 @@ TreeNode.propTypes = {
   root    : PropTypes.string,
   path    : PropTypes.string,
   items   : PropTypes.array,
+  display : PropTypes.array,
   depth   : PropTypes.number
 }
 
@@ -91,6 +94,7 @@ TreeNode.defaultProps = {
   root    : "",
   path    : "",
   items   : [],
+  display : [],
   depth   : 0
 }
 
