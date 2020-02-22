@@ -15,10 +15,16 @@ const MainPage = React.memo(props => {
   const [ignored, forceUpdate]  = useReducer(x => x + 1, 0)
   const [dirId,   reloadDir]    = useReducer(x => x + 1, 0)
 
-  const refs = useRef({
+  const refsLeft = useRef({
     project : React.createRef(),
     summary : React.createRef(),
     explorer: React.createRef()
+  })
+
+  const refsBody = useRef({
+    summary : React.createRef(),
+    view    : React.createRef(),
+    terminal: React.createRef()
   })
 
   const dirpath   = useRef("")
@@ -26,12 +32,20 @@ const MainPage = React.memo(props => {
 
   const handleSelectProject = useCallback(data => {
     dirpath.current = data.path
-    refs.current.summary.current.click()
+    refsLeft.current.summary.current.click()
     forceUpdate()
   }, [true])
 
   const handleSelectFile = useCallback(data => {
-    filepath.current = data.path
+    switch (data.action) {
+      case "view":
+        filepath.current = data.path
+        refsBody.current.view.current.click()
+        break
+
+      default:
+        break
+    }
     forceUpdate()
   }, [true])
 
@@ -54,7 +68,18 @@ const MainPage = React.memo(props => {
         body={
           <MainFrame
             head={ <div className="text-center my-1">Hello { props.user }!</div> }
-            body={ <FunctionalTableBox className="h-100" path={ filepath.current } user={ props.user } /> }
+            body={
+              <TabFrame
+                labels={ ["Summary", "View", "Terminal"] }
+                items={ [
+                  <></>,
+                  <FunctionalTableBox path={ filepath.current } user={ props.user } />,
+                  <TerminalBox command="" disabled={ true }/>
+                ] }
+                refs={ [refsBody.current.summary, refsBody.current.view, refsBody.current.terminal] }
+                overflow={ false }
+              />
+            }
             left={
               <TabFrame
                 labels={ ["Project", "Summary", "Explorer"] }
@@ -63,7 +88,7 @@ const MainPage = React.memo(props => {
                   <FileExplorerBox key={ dirpath.current } path={ dirpath.current } mode="vft" onSelect={ handleSelectFile } />,
                   <FileExplorerBox key={ dirpath.current } path={ dirpath.current } onSelect={ handleSelectFile } />,
                 ] }
-                refs={ [refs.current.project, refs.current.summary, refs.current.explorer] }
+                refs={ [refsLeft.current.project, refsLeft.current.summary, refsLeft.current.explorer] }
               />
             }
           />

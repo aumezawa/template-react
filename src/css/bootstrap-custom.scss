@@ -36,3 +36,19 @@
 .flex-basis-0 {
   flex-basis: 0;
 }
+
+// for Tab Frame
+.tab-content > .fit {
+  height: 100% !important;
+}
+
+// for Terminal
+.h-100w {
+  height: 98% !important;
+}
+
+// for Edge
+.text-break {
+  word-break : break-all !important;
+  word-wrap : break-word !important;;
+}

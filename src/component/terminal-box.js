@@ -26,7 +26,9 @@ const TerminalBox = React.memo(props => {
     }
   }, [props.path, props.user, props.command, props.disabled])
 
-  return <div ref={ ref } className={ props.className}></div>
+  return (
+    <div ref={ ref } className={ props.className }></div>
+  )
 })
 
 TerminalBox.propTypes = {
@@ -38,7 +40,7 @@ TerminalBox.propTypes = {
 }
 
 TerminalBox.defaultProps = {
-  className : "h-100",
+  className : "h-100w",
   path      : "/terminal",
   user      : "anonymous",
   command   : "",

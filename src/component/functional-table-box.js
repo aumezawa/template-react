@@ -115,7 +115,7 @@ FunctionalTableBox.propTypes = {
 }
 
 FunctionalTableBox.defaultProps = {
-  className : "",
+  className : "h-100",
   path      : "",
   user      : "anonymous"
 }

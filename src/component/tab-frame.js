@@ -34,6 +34,7 @@ const TabFrame = props => {
         {
           props.items.map((item, index) => (
             <TabItem
+              className={ `${ props.overflow ? "" : "fit" }` }
               key={ index }
               item={ item }
               labelId={ id.current.label + index }

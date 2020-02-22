@@ -6,7 +6,7 @@ const TabItem = props => {
 
   return (
     <div
-      className={ `tab-pane fade ${ active }` }
+      className={ `tab-pane fade ${ active } ${ props.className }` }
       id={ props.itemId }
       role="tabpanel"
       aria-labelledby={ props.labelId }
@@ -17,17 +17,19 @@ const TabItem = props => {
 }
 
 TabItem.propTypes = {
-  item    : PropTypes.element,
-  labelId : PropTypes.string.isRequired,
-  itemId  : PropTypes.string.isRequired,
-  active  : PropTypes.bool
+  className : PropTypes.string,
+  item      : PropTypes.element,
+  labelId   : PropTypes.string.isRequired,
+  itemId    : PropTypes.string.isRequired,
+  active    : PropTypes.bool
 }
 
 TabItem.defaultProps = {
-  item    : <></>,
-  labelId : undefined,
-  itemId  : undefined,
-  active  : false
+  className : "",
+  item      : <></>,
+  labelId   : undefined,
+  itemId    : undefined,
+  active    : false
 }
 
 export default TabItem
