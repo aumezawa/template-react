@@ -2,9 +2,9 @@ import React from "react"
 import PropTypes from "prop-types"
 
 const Comment = React.memo(props => {
-  const align = (props.user === props.author) ? "justify-content-end" : "justify-content-start"
-  const color = (props.user === props.author) ? "bg-success"          : "bg-secondary"
-  const none  = (props.user === props.author) ? "d-none"              : ""
+  const align = (props.user === props.author) ? "justify-content-end pl-4" : "justify-content-startm pr-4"
+  const color = (props.user === props.author) ? "bg-success"  : "bg-secondary"
+  const none  = (props.user === props.author) ? "d-none"      : ""
 
   return (
     <>

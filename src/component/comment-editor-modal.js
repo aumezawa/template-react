@@ -19,14 +19,14 @@ const CommentEditorModal = React.memo(props => {
       size="modal-xl"
       message={ props.message }
       body={ <CommentViewer user={ props.user } comments={ props.comments } /> }
-      footer={ <CommentForm className="w-100" key={ props.formId } cancel="Close" dismiss="modal" onSubmit={ handleSubmit } /> }
+      footer={ <CommentForm className="w-100" key={ props.formKey } cancel="Close" dismiss="modal" onSubmit={ handleSubmit } /> }
     />
   )
 })
 
 CommentEditorModal.propTypes = {
   id      : PropTypes.string.isRequired,
-  formId  : PropTypes.number,
+  formKey : PropTypes.number,
   title   : PropTypes.string,
   message : PropTypes.string,
   user    : PropTypes.string,
@@ -36,7 +36,7 @@ CommentEditorModal.propTypes = {
 
 CommentEditorModal.defaultProps = {
   id      : undefined,
-  formId  : 0,
+  formKey : 0,
   title   : "",
   message : "",
   user    : "anonymous",

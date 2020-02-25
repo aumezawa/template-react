@@ -1,6 +1,6 @@
 {
   "name": "template-react",
-  "version": "1.6.11",
+  "version": "1.6.12",
   "description": "Template of a project with react",
   "http_port": 80,
   "https_port": 443,

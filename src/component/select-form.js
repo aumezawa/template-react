@@ -22,7 +22,7 @@ const SelectForm = React.memo(React.forwardRef((props, ref) => {
           disabled={ props.disabled }
           onChange={ handleChange }
         >
-          { props.options.map((value, index) => <option key={ value } value={ index }>{ value }</option>) }
+          { props.options.map((value, index) => <option key={ value } value={ index } defaultValue={ index === props.default } >{ value }</option>) }
         </select>
       </div>
     </div>
@@ -30,20 +30,22 @@ const SelectForm = React.memo(React.forwardRef((props, ref) => {
 }))
 
 SelectForm.propTypes = {
-  valid     : PropTypes.bool.isRequired,
-  options   : PropTypes.array.isRequired,
   className : PropTypes.string,
   label     : PropTypes.string,
+  options   : PropTypes.array.isRequired,
+  valid     : PropTypes.bool.isRequired,
   disabled  : PropTypes.bool,
+  default   : PropTypes.number,
   onChange  : PropTypes.func
 }
 
 SelectForm.defaultProps = {
-  valid     : undefined,
-  options   : undefined,
   className : "mb-3",
   label     : "Select",
+  options   : undefined,
+  valid     : undefined,
   disabled  : false,
+  default   : 0,
   onChange  : undefined
 }
 
