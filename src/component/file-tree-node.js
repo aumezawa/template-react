@@ -48,7 +48,7 @@ const TreeNode = props => {
         }
       })
     } catch (err) {
-      return <TreeLeaf label="Invalid input data..." />
+      return <TreeLeaf label="No Data" />
     }
   }
 
@@ -63,13 +63,13 @@ const TreeNode = props => {
         aria-controls={ id.current.collapse }
         onClick={ handleClickNode }
       >
-      <div className="my-2 ml-3 mr-1">
+      <div className="py-2 pl-2 pr-1">
         { "-".repeat(props.depth) }
       </div>
-      <div className="my-2 mr-1">
+      <div className="py-2 pr-1">
         { open ? "[-]" : "[+]" }
       </div>
-      <div className="flex-grow-1 my-2 mr-3">
+      <div className="flex-grow-1 py-2 mr-2">
         { props.source && props.source.name }
       </div>
       </button>

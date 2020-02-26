@@ -12,10 +12,10 @@ const TreeLeaf = props => {
 
   return (
     <li className="d-flex flex-row list-group-item list-group-item-action list-group-item-light rounded-0 py-0 px-0">
-      <div className="text-nowrap my-2 ml-3 mr-1">
+      <div className="text-nowrap py-2 pl-2 pr-1">
         { "-".repeat(props.depth) }
       </div>
-      <div className="flex-grow-1 text-break my-2">
+      <div className="flex-grow-1 text-break py-2 pr-1">
         { props.label }
       </div>
       <DropdownButton
