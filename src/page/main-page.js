@@ -11,9 +11,11 @@ import NavigatorItem from "../component/navigator-item.js"
 import TabFrame from "../component/tab-frame.js"
 import TerminalBox from "../component/terminal-box.js"
 
+import sleep from "../lib/sleep.js"
+
 const MainPage = React.memo(props => {
   const [ignored, forceUpdate]  = useReducer(x => x + 1, 0)
-  const [dirId,   reloadDir]    = useReducer(x => x + 1, 0)
+  const [dirKey,  reloadDir]    = useReducer(x => x + 1, 0)
 
   const refsLeft = useRef({
     project : React.createRef(),
@@ -23,15 +25,18 @@ const MainPage = React.memo(props => {
 
   const refsBody = useRef({
     summary : React.createRef(),
-    view    : React.createRef(),
+    viewer  : React.createRef(),
     terminal: React.createRef()
   })
 
-  const dirpath   = useRef("")
-  const filepath  = useRef("")
+  const explorerDirpath = useRef("")
+  const viewerFilepath  = useRef("")
+  const terminalCommand = useRef("")
+  const terminalActive  = useRef(false)
+  const terminalName    = useRef("No Data")
 
   const handleSelectProject = useCallback(data => {
-    dirpath.current = data.path
+    explorerDirpath.current = data.path
     refsLeft.current.summary.current.click()
     forceUpdate()
   }, [true])
@@ -39,14 +44,32 @@ const MainPage = React.memo(props => {
   const handleSelectFile = useCallback(data => {
     switch (data.action) {
       case "view":
-        filepath.current = data.path
-        refsBody.current.view.current.click()
+        viewerFilepath.current = data.path
+        refsBody.current.viewer.current.click()
+        forceUpdate()
+        break
+
+      case "viewInTerminal":
+        terminalCommand.current = "less PATH:" + data.path
+        terminalActive.current = true
+        terminalName.current = data.path
+        refsBody.current.terminal.current.click()
+        sleep(1)
+        .then(() => forceUpdate())
+        break
+
+      case "debugger":
+        terminalCommand.current = "gdb DBGSYMBOL: PATH:" + data.path
+        terminalActive.current = true
+        terminalName.current = data.path
+        refsBody.current.terminal.current.click()
+        sleep(1)
+        .then(() => forceUpdate())
         break
 
       default:
         break
     }
-    forceUpdate()
   }, [true])
 
   const handleDoneFileUpload = useCallback(() => {
@@ -73,10 +96,10 @@ const MainPage = React.memo(props => {
                 labels={ ["Summary", "View", "Terminal"] }
                 items={ [
                   <></>,
-                  <FunctionalTableBox path={ filepath.current } user={ props.user } />,
-                  <TerminalBox command="" disabled={ true }/>
+                  <FunctionalTableBox path={ viewerFilepath.current } user={ props.user } />,
+                  <TerminalBox command={ terminalCommand.current } name={ terminalName.current } disabled={ !terminalActive.current } />
                 ] }
-                refs={ [refsBody.current.summary, refsBody.current.view, refsBody.current.terminal] }
+                refs={ [refsBody.current.summary, refsBody.current.viewer, refsBody.current.terminal] }
                 overflow={ false }
               />
             }
@@ -84,9 +107,9 @@ const MainPage = React.memo(props => {
               <TabFrame
                 labels={ ["Project", "Summary", "Explorer"] }
                 items={ [
-                  <ProjectExplorerBox key={ dirId } path="/data" onSelect={ handleSelectProject } />,
-                  <FileExplorerBox key={ dirpath.current } path={ dirpath.current } mode="vft" onSelect={ handleSelectFile } />,
-                  <FileExplorerBox key={ dirpath.current } path={ dirpath.current } onSelect={ handleSelectFile } />,
+                  <ProjectExplorerBox key={ dirKey } path="/data" onSelect={ handleSelectProject } />,
+                  <FileExplorerBox key={ explorerDirpath.current } path={ explorerDirpath.current } mode="vft" onSelect={ handleSelectFile } />,
+                  <FileExplorerBox key={ explorerDirpath.current } path={ explorerDirpath.current } onSelect={ handleSelectFile } />,
                 ] }
                 refs={ [refsLeft.current.project, refsLeft.current.summary, refsLeft.current.explorer] }
               />

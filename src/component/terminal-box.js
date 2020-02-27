@@ -12,6 +12,7 @@ const TerminalBox = React.memo(props => {
   useEffect(() => {
     const terminal = new Terminal({ cursorBlink: true, cursorStyle: "underline" })
     const fitAddon = new FitAddon()
+    let socket = undefined
 
     terminal.loadAddon(fitAddon)
     terminal.open(ref.current)
@@ -20,19 +21,30 @@ const TerminalBox = React.memo(props => {
       fitAddon.fit()
 
       const query = `?user=${ props.user }&cmd=${ props.command }&cols=${ terminal.cols }&rows=${ terminal.rows }`
-      const io = socketio(encodeURI(query), { path: props.path })
-      terminal.onData(data => io.emit("input", data))
-      io.on("output", data => terminal.write(data))
+      socket = socketio(encodeURI(query), { path: props.path })
+      terminal.onData(data => socket.emit("input", data))
+      socket.on("output", data => terminal.write(data))
+    }
+
+    return () => {
+      terminal.dispose()
+      if (socket) {
+        socket.disconnect()
+      }
     }
   }, [props.path, props.user, props.command, props.disabled])
 
   return (
-    <div ref={ ref } className={ props.className }></div>
+    <div className={ `${props.className} d-flex flex-column` }>
+      <div className="text-monospace font-weight-bold text-white bg-dark py-1 px-3">{ props.name }</div>
+      <div ref={ ref } className="flex-grow-1"></div>
+    </div>
   )
 })
 
 TerminalBox.propTypes = {
   className : PropTypes.string,
+  name      : PropTypes.string,
   path      : PropTypes.string,
   user      : PropTypes.string,
   command   : PropTypes.string,
@@ -40,7 +52,8 @@ TerminalBox.propTypes = {
 }
 
 TerminalBox.defaultProps = {
-  className : "h-100w",
+  className : "h-100",
+  name      : "unnamed",
   path      : "/terminal",
   user      : "anonymous",
   command   : "",

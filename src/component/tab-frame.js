@@ -25,7 +25,7 @@ const TabFrame = props => {
               label={ label }
               labelId={ id.current.label + index }
               itemId={ id.current.item + index }
-              active={ index === 0 }
+              active={ index === props.default }
             />
           ))
         }
@@ -39,7 +39,7 @@ const TabFrame = props => {
               item={ item }
               labelId={ id.current.label + index }
               itemId={ id.current.item + index }
-              active={ index === 0 }
+              active={ index === props.default }
             />
           ))
         }
@@ -53,6 +53,7 @@ TabFrame.propTypes = {
   labels    : PropTypes.array,
   items     : PropTypes.array,
   refs      : PropTypes.array,
+  default   : PropTypes.number,
   overflow  : PropTypes.bool
 }
 
@@ -61,6 +62,7 @@ TabFrame.defaultProps = {
   labels    : [],
   items     : [],
   refs      : [],
+  default   : 0,
   overflow  : true
 }
 
