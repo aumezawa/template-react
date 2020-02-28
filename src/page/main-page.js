@@ -1,13 +1,15 @@
 import React, { useRef, useCallback, useReducer } from "react"
 import PropTypes from "prop-types"
 
-import ProjectExplorerBox from "../component/project-explorer-box.js"
+import DropdownDivider from "../component/dropdown-divider.js"
+import DropdownHeader from "../component/dropdown-header.js"
 import FileExplorerBox from "../component/file-explorer-box.js"
 import FunctionalTableBox from "../component/functional-table-box.js"
 import LayerFrame from "../component/layer-frame.js"
 import MainFrame from "../component/main-frame.js"
 import NavigatorBar from "../component/navigator-bar.js"
 import NavigatorItem from "../component/navigator-item.js"
+import ProjectExplorerBox from "../component/project-explorer-box.js"
 import TabFrame from "../component/tab-frame.js"
 import TerminalBox from "../component/terminal-box.js"
 
@@ -83,6 +85,8 @@ const MainPage = React.memo(props => {
           <NavigatorBar
             title={ props.project }
             items={ [
+              <DropdownHeader key="header" label={ `Version: ${ props.version }` } />,
+              <DropdownDivider key="divider" />,
               <NavigatorItem key="register" label="Register User" page="/auth/form/register" disabled={ props.user !== "root" } />,
               <NavigatorItem key="logout"   label="Logout"        page="/auth/form/logout"   disabled={ false } />
             ] }
@@ -107,7 +111,7 @@ const MainPage = React.memo(props => {
               <TabFrame
                 labels={ ["Project", "Summary", "Explorer"] }
                 items={ [
-                  <ProjectExplorerBox key={ dirKey } path="/data" onSelect={ handleSelectProject } />,
+                  <ProjectExplorerBox key={ dirKey } path="/data" user={ props.user } onSelect={ handleSelectProject } />,
                   <FileExplorerBox key={ explorerDirpath.current } path={ explorerDirpath.current } mode="vft" onSelect={ handleSelectFile } />,
                   <FileExplorerBox key={ explorerDirpath.current } path={ explorerDirpath.current } onSelect={ handleSelectFile } />,
                 ] }
@@ -126,12 +130,14 @@ const MainPage = React.memo(props => {
 MainPage.propTypes = {
   project : PropTypes.string,
   author  : PropTypes.string,
+  version : PropTypes.string,
   user    : PropTypes.string
 }
 
 MainPage.defaultProps = {
   project : "unaffiliated",
   author  : "unnamed",
+  version : "no version",
   user    : "anonymous"
 }
 

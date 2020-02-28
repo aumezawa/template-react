@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback, useReducer } from "rea
 import PropTypes from "prop-types"
 
 import axios from "axios"
+import path from "path"
 
 import DropdownButton from "./dropdown-button.js"
 import DropdownItem from "./dropdown-item.js"
@@ -13,7 +14,7 @@ import TreeLeaf from "./file-tree-leaf.js"
 import uniqueId from "../lib/uniqueId.js"
 
 const ProjectExplorerBox = React.memo(props => {
-  const [mode   , setMode]     = useState(true)
+  const [mode   , setMode]     = useState((props.user !== "anonymous") ? true : false)
   const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
 
   const id = useRef({
@@ -22,6 +23,7 @@ const ProjectExplorerBox = React.memo(props => {
   })
   const ls = useRef([])
   const dirPath = useRef("")
+  const dirName = useRef("")
 
   const loadProject = useCallback(() => {
     if (props.path === "") {
@@ -73,6 +75,7 @@ const ProjectExplorerBox = React.memo(props => {
 
   const handleUpload = useCallback(data => {
     dirPath.current = data.parent
+    dirName.current = path.basename(data.parent)
     forceUpdate()
   }, [true])
 
@@ -119,7 +122,7 @@ const ProjectExplorerBox = React.memo(props => {
               <DropdownItem
                 key="delete"
                 label="delete"
-                display={ props.user == "root" }
+                display={ props.user == "root" || !mode }
                 onClick={ handleDelete }
               />
             ] }
@@ -141,6 +144,7 @@ const ProjectExplorerBox = React.memo(props => {
       <FileUploaderModal
         id={ id.current.upload }
         path={ dirPath.current }
+        title={ `File Upload into ${ dirName.current }` }
         directory={ false }
         onDone={ undefined }
       />
@@ -149,7 +153,8 @@ const ProjectExplorerBox = React.memo(props => {
           className="flex-grow-1 p-2"
           onLabel="public"
           offLabel="private"
-          defaultOn
+          defaultOn={ props.user !== "anonymous" }
+          disabled={ props.user === "anonymous" }
           onClick={ handleClickMode }
         />
         <DropdownButton

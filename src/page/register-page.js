@@ -2,6 +2,8 @@ import React from "react"
 import PropTypes from "prop-types"
 
 import CenterFrame from "../component/center-frame.js"
+import DropdownDivider from "../component/dropdown-divider.js"
+import DropdownHeader from "../component/dropdown-header.js"
 import LayerFrame from "../component/layer-frame.js"
 import NavigatorBar from "../component/navigator-bar.js"
 import NavigatorItem from "../component/navigator-item.js"
@@ -14,6 +16,8 @@ const LoginPage = React.memo((props) => (
         <NavigatorBar
           title={ props.project }
           items={ [
+            <DropdownHeader key="header" label={ `Version: ${ props.version }` } />,
+            <DropdownDivider key="divider" />,
             <NavigatorItem key="main" />,
             <NavigatorItem key="logout" label="Logout" page="/auth/form/logout" />
           ] }
